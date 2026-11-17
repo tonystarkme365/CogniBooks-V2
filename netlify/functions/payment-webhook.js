@@ -1,6 +1,6 @@
-import { getOrder, getOrderByPaymentId, updateOrder, getProduct } from '../../utils/db.js';
-import { verifyJWT, invalidateToken, signJWT } from '../../utils/jwt.js';
-import { sendDownloadEmail } from '../../utils/email.js';
+import { getOrder, getOrderByPaymentId, updateOrder, getProduct } from './utils/db.js';
+import { verifyJWT, invalidateToken, signJWT } from './utils/jwt.js';
+import { sendDownloadEmail } from './utils/email.js';
 
 const WALLET = process.env.WALLET_ADDRESS || '0xe4c3a86276c87bbe8b9d8a1aff199bb696b5cf53';
 const SITE_URL = process.env.URL || 'https://cognibook.netlify.app';

@@ -1,6 +1,6 @@
-import { getOrder, updateOrder, getProduct } from '../../utils/db.js';
-import { verifyJWT, signJWT } from '../../utils/jwt.js';
-import { sendDownloadEmail } from '../../utils/email.js';
+import { getOrder, updateOrder, getProduct } from './utils/db.js';
+import { verifyJWT, signJWT } from './utils/jwt.js';
+import { sendDownloadEmail } from './utils/email.js';
 
 const SITE_URL = process.env.URL || 'https://cognibook.netlify.app';
 

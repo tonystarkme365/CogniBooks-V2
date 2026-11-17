@@ -1,5 +1,5 @@
-import { createOrder, getProduct } from '../../utils/db.js';
-import { signJWT } from '../../utils/jwt.js';
+import { createOrder, getProduct } from './utils/db.js';
+import { signJWT } from './utils/jwt.js';
 
 const WALLET = process.env.WALLET_ADDRESS || '0xe4c3a86276c87bbe8b9d8a1aff199bb696b5cf53';
 const SITE_URL = process.env.URL || 'https://cognibook.netlify.app';

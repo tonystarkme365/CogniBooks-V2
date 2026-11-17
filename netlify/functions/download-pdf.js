@@ -1,6 +1,6 @@
-import { verifyJWT, invalidateToken } from '../../utils/jwt.js';
-import { getProduct } from '../../utils/db.js';
-import { getPDFStream, getPDFBuffer, pdfExists } from '../../utils/storage.js';
+import { verifyJWT, invalidateToken } from './utils/jwt.js';
+import { getProduct } from './utils/db.js';
+import { getPDFStream, getPDFBuffer, pdfExists } from './utils/storage.js';
 
 export async function handler(event) {
   const { token } = event.queryStringParameters || {};
