@@ -2,7 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 
-const DB_PATH = path.join(process.cwd(), 'netlify', 'data', 'orders.json');
+const DB_DIR = '/tmp/netlify/data';
+const DB_PATH = path.join(DB_DIR, 'orders.json');
 const PRODUCTS = [
   { id: 1, title: 'AI Arsenal for Entrepreneurs', price: 29.99, pdfPath: 'AI Arsenal for Entrepreneurs.pdf', pages: 156 },
   { id: 2, title: 'Promotion-Ready with AI Prompts', price: 27.99, pdfPath: 'Promotion-Ready With AI Prompts.pdf', pages: 134 },
@@ -12,8 +13,7 @@ const PRODUCTS = [
 ];
 
 function ensureDB() {
-  const dir = path.dirname(DB_PATH);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
   if (!fs.existsSync(DB_PATH)) fs.writeFileSync(DB_PATH, '[]');
 }
 
