@@ -423,7 +423,7 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
 
             <PaymentSection
               walletAddress={WALLET_ADDRESS}
-              defaultAmount={total}
+              amount={total}
               productId={productId}
             />
           </div>
