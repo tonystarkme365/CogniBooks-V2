@@ -382,7 +382,7 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
               autoComplete="email"
             />
 
-            <button onClick={handleContinue} style={{
+<button onClick={handleContinue} style={{
               width:'100%',padding:'16px',border:'none',borderRadius:14,
               background:'linear-gradient(135deg,#00ff88,#00cc6a)',
               color:'#030a05',fontSize:16,fontWeight:800,cursor:'pointer',
@@ -390,24 +390,23 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
               transition:'transform .2s,box-shadow .2s',
               marginTop:4,
             }}
-              onMouseOver={e => {
-                (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)';
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 32px rgba(0,255,136,.5)';
-              }}
-              onMouseOut={e => {
-                (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 24px rgba(0,255,136,.35)';
-              }}
-            >
-              Continue to Payment →
-            </button>
+            onMouseOver={e => {
+              (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)';
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 32px rgba(0,255,136,.5)';
+            }}
+            onMouseOut={e => {
+              (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 24px rgba(0,255,136,.35)';
+            }}
+          >
+            Continue to Payment →
+          </button>
 
-<p style={{ textAlign:'center',fontSize:12,color:C.faint,marginTop:12 }}>
-              🔒 256-bit SSL encrypted · Your info is never sold or shared
-            </p>
-          </div>
-          
+          <p style={{ textAlign:'center',fontSize:12,color:C.faint,marginTop:12 }}>
+            🔒 256-bit SSL encrypted · Your info is never sold or shared
+          </p>
         </div>
+        
       </div>
     </div>
   );
