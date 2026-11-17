@@ -10,10 +10,8 @@ function buildPayBisUrl({ amount, orderId, token }) {
     currency: 'USD',
     wallet: WALLET,
     network: 'polygon',
-    // Note: PayBis doesn't support custom callback URLs in standard flow
-    // For production, use their API webhook configuration
   });
-  return `https://paybis.com/buy/usdc/polygon?${params.toString()}&order_id=${orderId}`;
+  return `https://paybis.com/buy/usdc/polygon?${params.toString()}`;
 }
 
 function buildTransakUrl({ amount, orderId, token }) {
