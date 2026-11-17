@@ -1,4 +1,4 @@
-import { useState, useId } from 'react';
+import { useState } from 'react';
 
 interface PaymentSectionProps {
   walletAddress: string;
@@ -23,7 +23,6 @@ export function PaymentSection({
   amount,
   productId,
 }: PaymentSectionProps) {
-  const inputId = useId();
   const usdAmount = amount.toFixed(2);
   const encodedWallet = encodeURIComponent(walletAddress);
   const encodedAmount = encodeURIComponent(usdAmount);
@@ -33,8 +32,6 @@ export function PaymentSection({
 
   const handlePrimaryClick = () => window.open(paybisUrl, '_blank', 'noopener,noreferrer');
   const handleSecondaryClick = () => window.open(transakUrl, '_blank', 'noopener,noreferrer');
-
-  const maskedWallet = `${walletAddress.slice(0, 6)}…${walletAddress.slice(-4)}`;
 
   return (
     <div style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
@@ -158,10 +155,10 @@ export function PaymentSection({
             btn.style.transform = 'translateY(0)';
           }}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.68-.35.68-.78 0-.39-.01-1.69-.01-3.33-2.78.6-3.37-1.34-3.37-1.34-.45-1.15-1.11-1.46-1.11-1.46-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.69.92.69 1.85 0 1.33-.01 2.41-.01 2.74 0 .43.18.86.69.78A10.02 10.02 0 0022 12c0-5.52-4.48-10-10-10z"/>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/><path d="M16 14h-3v3h3v-3"/><path d="M8 14H5v3h3v-3"/>
           </svg>
-          <span>Master Card / Visa Card</span>
+          <span>Master Card / Visa Card / Apple Pay / Google Pay</span>
         </button>
 
       </div>
@@ -190,10 +187,6 @@ export function PaymentSection({
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="22" x2="12" y2="15.5"/><line x1="22" y1="8.5" x2="12" y2="15.5"/><line x1="2" y1="8.5" x2="12" y2="15.5"/></svg>
           USDC (0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174)
-        </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          Recipient: <code style={{ color: C.cyan, fontFamily: 'monospace' }}>{maskedWallet}</code>
         </span>
       </div>
     </div>
