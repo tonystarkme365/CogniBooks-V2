@@ -218,11 +218,9 @@ function OrderSummary({
   );
 }
 
-// ── CrossmintPaymentStep ──────────────────────────────────────────────────
-function CrossmintPaymentStep({
-  product, total, email, onBack
-}: {
-  // ── Main CheckoutPage ─────────────────────────────────────────────────────
+);
+
+// ── Main CheckoutPage ─────────────────────────────────────────────────────
 const CheckoutPage = ({ productId }: { productId: string }) => {
   const product = CONFIG.getProductById(productId);
 
