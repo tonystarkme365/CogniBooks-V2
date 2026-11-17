@@ -1,8 +1,52 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import CONFIG from '../config.js';
 
 const SuccessPage = () => {
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const orderId = sessionStorage.getItem('cognibooks_order_id');
+
+    if (token && !downloading) {
+      triggerDownload(token);
+    } else if (!token && orderId) {
+      // Order exists but no token - maybe webhook hasn't fired yet
+      setDownloadError('Payment confirmed. Check your email for the download link.');
+    } else if (!token && !orderId) {
+      // No token, no order - generic success
+      setDownloadError('Purchase complete! Check your email for the download link.');
+    }
+  }, []);
+
+  const triggerDownload = async (token: string) => {
+    setDownloading(true);
+    try {
+      const res = await fetch(`/.netlify/functions/download-pdf?token=${encodeURIComponent(token)}`);
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Download failed');
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'ebook.pdf';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      setDownloading(false);
+    } catch (err) {
+      console.error('Download error:', err);
+      setDownloadError(err instanceof Error ? err.message : 'Download failed. Check your email.');
+      setDownloading(false);
+    }
+  };
+
+  const confettiEffect = () => {
     const colors = ['#00ff88','#00d4ff','#ff00ff','#ffaa00','#fff'];
     for (let i = 0; i < 80; i++) {
       const el = document.createElement('div');
@@ -14,6 +58,10 @@ const SuccessPage = () => {
       ], { duration: 2600+Math.random()*2000, easing:'ease-in', delay:Math.random()*700 });
       anim.onfinish = () => el.remove();
     }
+  };
+
+  useEffect(() => {
+    confettiEffect();
   }, []);
 
   return (
@@ -22,8 +70,24 @@ const SuccessPage = () => {
         <div style={{ fontSize:72,marginBottom:18,display:'block',animation:'float 3s ease-in-out infinite' }}>🎉</div>
         <h1 className="gradient-text" style={{ fontSize:42,fontWeight:900,marginBottom:16,letterSpacing:'-0.03em' }}>Purchase Complete!</h1>
         <p style={{ fontSize:17,color:'var(--clr-muted)',marginBottom:28,lineHeight:1.7 }}>
-          Thank you for your purchase! Your eBook is on its way to your inbox.
+          Thank you for your purchase!
         </p>
+        
+        {downloading && (
+          <div style={{ marginBottom: 24, padding: 16, background: 'rgba(0,255,136,.1)', border: '1px solid rgba(0,255,136,.3)', borderRadius: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+              <div style={{ width: 20, height: 20, border: '2px solid var(--clr-primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+              <span style={{ color: 'var(--clr-primary)', fontWeight: 600 }}>Preparing your download...</span>
+            </div>
+          </div>
+        )}
+
+        {downloadError && !downloading && (
+          <div style={{ marginBottom: 24, padding: 16, background: 'rgba(255,170,0,.1)', border: '1px solid rgba(255,170,0,.3)', borderRadius: 12 }}>
+            <p style={{ color: 'var(--clr-warn)', margin: 0 }}>⚠️ {downloadError}</p>
+          </div>
+        )}
+
         <div className="glass" style={{ padding:22,marginBottom:28,textAlign:'left' }}>
           <h3 style={{ fontSize:16,fontWeight:700,marginBottom:14,color:'var(--clr-primary)' }}>📧 What Happens Next?</h3>
           <ul style={{ listStyle:'none',padding:0,fontSize:14,lineHeight:2.2 }}>
@@ -47,7 +111,7 @@ const SuccessPage = () => {
           <a href="#home" className="btn btn-secondary" style={{ fontSize:13 }}>View Bundle →</a>
         </div>
       </div>
-      <style>{`@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}`}</style>
+      <style>{`@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}} @keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   );
 };

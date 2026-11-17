@@ -11,12 +11,8 @@
 import { useState, useEffect, useId } from 'react';
 import CONFIG from '../config.js';
 import { formatPrice } from '../utils.js';
-import PaymentSection from '@/components/PaymentSection';
 
 // ── Config ────────────────────────────────────────────────────────────────
-const WALLET_ADDRESS = '0xe4c3a86276c87bbe8b9d8a1aff199bb696b5cf53';
-
-// ── Colour tokens ────────────────────────────────────────────────────────
 const C = {
   primary:  '#00ff88',
   cyan:     '#00d4ff',
@@ -28,46 +24,30 @@ const C = {
   card:     'rgba(16,14,32,.97)',
 };
 
-type Phase = 'info' | 'payment';
+type Phase = 'info';
 
 // ── Step indicator ────────────────────────────────────────────────────────
 function Steps({ phase }: { phase: Phase }) {
-  const idx = phase === 'info' ? 0 : 1;
   return (
-    <div style={{ display:'flex',alignItems:'center',justifyContent:'center',gap:0,marginBottom:8 }}>
-      {(['Details','Payment'] as const).map((s, i) => (
-        <div key={s} style={{ display:'flex',alignItems:'center' }}>
-          <div style={{ display:'flex',flexDirection:'column',alignItems:'center',gap:5 }}>
-            <div style={{
-              width:34,height:34,borderRadius:'50%',
-              display:'flex',alignItems:'center',justifyContent:'center',
-              fontSize: i < idx ? 14 : 12, fontWeight:800,
-              background: i === idx
-                ? 'linear-gradient(135deg,#00ff88,#00cc6a)'
-                : i < idx ? 'linear-gradient(135deg,#00d4ff,#0099cc)' : 'rgba(255,255,255,.06)',
-              color: i <= idx ? '#030a05' : C.faint,
-              boxShadow: i === idx ? '0 4px 16px rgba(0,255,136,.45)' : 'none',
-              transition:'all .3s',
-            }}>
-              {i < idx ? '✓' : `0${i+1}`}
-            </div>
-            <span style={{
-              fontSize:10,fontWeight:700,letterSpacing:'.06em',textTransform:'uppercase',
-              color: i === idx ? C.primary : i < idx ? C.cyan : C.faint,
-            }}>{s}</span>
+    <div style={{ display:'flex',alignItems:'center',justifyContent:'center',marginBottom:8 }}>
+      <div style={{ display:'flex',alignItems:'center' }}>
+        <div style={{ display:'flex',flexDirection:'column',alignItems:'center',gap:5 }}>
+          <div style={{
+            width:34,height:34,borderRadius:'50%',
+            display:'flex',alignItems:'center',justifyContent:'center',
+            fontSize: 14, fontWeight:800,
+            background: 'linear-gradient(135deg,#00ff88,#00cc6a)',
+            color: '#030a05',
+            boxShadow: '0 4px 16px rgba(0,255,136,.45)',
+          }}>
+            ✓
           </div>
-          {i < 1 && (
-            <div style={{
-              width:72,height:2,
-              background: idx > 0
-                ? 'linear-gradient(90deg,#00d4ff,#00ff88)'
-                : 'rgba(255,255,255,.06)',
-              borderRadius:2,margin:'0 12px 18px',
-              transition:'background .4s',
-            }} />
-          )}
+          <span style={{
+            fontSize:10,fontWeight:700,letterSpacing:'.06em',textTransform:'uppercase',
+            color: C.primary,
+          }}>Details</span>
         </div>
-      ))}
+      </div>
     </div>
   );
 }
@@ -222,7 +202,6 @@ function OrderSummary({
 const CheckoutPage = ({ productId }: { productId: string }) => {
   const product = CONFIG.getProductById(productId);
 
-  const [phase,     setPhase]     = useState<Phase>('info');
   const [name,      setName]      = useState('');
   const [email,     setEmail]     = useState('');
   const [nameErr,   setNameErr]   = useState('');
@@ -233,7 +212,7 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [phase]);
+  }, []);
 
   if (!product) {
     return (
@@ -260,7 +239,7 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
     }
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     let valid = true;
     if (!name.trim() || name.trim().length < 2) {
       setNameErr('Full name is required'); valid = false;
@@ -269,7 +248,43 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
     if (!emailRx.test(email.trim())) {
       setEmailErr('Enter a valid email address'); valid = false;
     } else { setEmailErr(''); }
-    if (valid) setPhase('payment');
+    if (!valid) return;
+
+    // Show loading state
+    const btn = document.querySelector('button[type="submit"]');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Creating order...';
+    }
+
+    try {
+      const res = await fetch('/.netlify/functions/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, email: email.trim(), name: name.trim() }),
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to create order');
+      }
+
+      // Store order ID for reference
+      sessionStorage.setItem('cognibooks_order_id', data.orderId);
+      
+      // Redirect to PayBis (default) - user can choose on payment page
+      window.location.href = data.paybisUrl;
+    } catch (err) {
+      console.error('Order creation failed:', err);
+      alert(err.message || 'Failed to create order. Please try again.');
+      
+      // Reset button
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Continue to Payment →';
+      }
+    }
   };
 
   return (
@@ -315,7 +330,7 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
       }}>
 
         {/* Steps */}
-        <Steps phase={phase} />
+        <Steps />
 
         {/* ── ORDER SUMMARY CARD (always visible) ── */}
         <div style={{
@@ -391,47 +406,12 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
             <p style={{ textAlign:'center',fontSize:12,color:C.faint,marginTop:12 }}>
               🔒 256-bit SSL encrypted · Your info is never sold or shared
             </p>
-          </div>
-        )}
-
-        {/* ── STEP 2: Payment ── */}
-        {phase === 'payment' && (
-          <div style={{
-            background:C.card,border:`1px solid ${C.border}`,
-            borderRadius:20,padding:'28px 24px',
-            backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',
-            minHeight:320,
-          }}>
-            <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20 }}>
-              <h2 style={{ fontSize:20,fontWeight:800,color:C.text,margin:0 }}>Payment</h2>
-              <button onClick={() => setPhase('info')} style={{
-                padding:'6px 14px',borderRadius:8,border:`1px solid ${C.border}`,
-                background:'rgba(255,255,255,.04)',color:C.muted,
-                fontSize:12,fontWeight:600,cursor:'pointer',
-              }}>← Edit Details</button>
-            </div>
-
-            {/* Summary of who's paying */}
-            <div style={{
-              background:'rgba(255,255,255,.03)',border:`1px solid ${C.border}`,
-              borderRadius:10,padding:'10px 14px',marginBottom:20,
-              fontSize:13,color:C.muted,
-            }}>
-              Paying as: <strong style={{ color:C.text }}>{name}</strong>
-              {' · '}<span style={{ color:C.muted }}>{email}</span>
-            </div>
-
-            <PaymentSection
-              walletAddress={WALLET_ADDRESS}
-              amount={total}
-              productId={productId}
-            />
-          </div>
-        )}
-
-      </div>
-    </div>
-  );
-};
+</div>
+         )}
+       
+       </div>
+     </div>
+   );
+ };
 
 export default CheckoutPage;
