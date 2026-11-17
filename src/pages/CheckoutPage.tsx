@@ -349,17 +349,16 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
             setCouponCode={setCouponCode}
             onApply={applyCoupon}
             couponMsg={couponMsg}
-            locked={phase === 'payment'}
+            locked={false}
           />
         </div>
 
         {/* ── STEP 1: Your Details ── */}
-        {phase === 'info' && (
-          <div style={{
-            background:C.card,border:`1px solid ${C.border}`,
-            borderRadius:20,padding:'28px 24px',
-            backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',
-          }}>
+        <div style={{
+          background:C.card,border:`1px solid ${C.border}`,
+          borderRadius:20,padding:'28px 24px',
+          backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',
+        }}>
             <h2 style={{ fontSize:22,fontWeight:800,color:C.text,marginBottom:6 }}>Your Details</h2>
             <p style={{ fontSize:13,color:C.muted,marginBottom:24 }}>
               We'll send your download link to this email instantly after purchase.
@@ -405,13 +404,13 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
 
             <p style={{ textAlign:'center',fontSize:12,color:C.faint,marginTop:12 }}>
               🔒 256-bit SSL encrypted · Your info is never sold or shared
-            </p>
-</div>
-         )}
-       
-       </div>
-     </div>
-   );
- };
+</p>
+          </div>
+        >
+        
+      </div>
+    </div>
+  );
+};
 
 export default CheckoutPage;
