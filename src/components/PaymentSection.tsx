@@ -184,10 +184,6 @@ export function PaymentSection({
           }}></span>
           Polygon Mainnet
         </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="22" x2="12" y2="15.5"/><line x1="22" y1="8.5" x2="12" y2="15.5"/><line x1="2" y1="8.5" x2="12" y2="15.5"/></svg>
-          USDC (0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174)
-        </span>
       </div>
     </div>
   );
