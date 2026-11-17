@@ -163,27 +163,6 @@ export function PaymentSection({
 
       </div>
 
-      <div style={{
-        marginTop: 20,
-        padding: '14px 16px',
-        background: 'rgba(0,255,136,.04)',
-        border: `1px solid rgba(0,255,136,.12)`,
-        borderRadius: 12,
-        fontSize: 12,
-        color: C.muted,
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{
-            width: 8, height: 8, borderRadius: '50%',
-            background: C.primary, boxShadow: `0 0 8px ${C.primary}`,
-          }}></span>
-          Polygon Mainnet
-        </span>
       </div>
     </div>
   );
