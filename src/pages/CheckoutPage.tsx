@@ -24,30 +24,46 @@ const C = {
   card:     'rgba(16,14,32,.97)',
 };
 
-type Phase = 'info';
+type Phase = 'info' | 'payment';
 
 // ── Step indicator ────────────────────────────────────────────────────────
 function Steps({ phase }: { phase: Phase }) {
+  const idx = phase === 'info' ? 0 : 1;
   return (
-    <div style={{ display:'flex',alignItems:'center',justifyContent:'center',marginBottom:8 }}>
-      <div style={{ display:'flex',alignItems:'center' }}>
-        <div style={{ display:'flex',flexDirection:'column',alignItems:'center',gap:5 }}>
-          <div style={{
-            width:34,height:34,borderRadius:'50%',
-            display:'flex',alignItems:'center',justifyContent:'center',
-            fontSize: 14, fontWeight:800,
-            background: 'linear-gradient(135deg,#00ff88,#00cc6a)',
-            color: '#030a05',
-            boxShadow: '0 4px 16px rgba(0,255,136,.45)',
-          }}>
-            ✓
+    <div style={{ display:'flex',alignItems:'center',justifyContent:'center',gap:0,marginBottom:8 }}>
+      {(['Details','Payment'] as const).map((s, i) => (
+        <div key={s} style={{ display:'flex',alignItems:'center' }}>
+          <div style={{ display:'flex',flexDirection:'column',alignItems:'center',gap:5 }}>
+            <div style={{
+              width:34,height:34,borderRadius:'50%',
+              display:'flex',alignItems:'center',justifyContent:'center',
+              fontSize: i < idx ? 14 : 12, fontWeight:800,
+              background: i === idx
+                ? 'linear-gradient(135deg,#00ff88,#00cc6a)'
+                : i < idx ? 'linear-gradient(135deg,#00d4ff,#0099cc)' : 'rgba(255,255,255,.06)',
+              color: i <= idx ? '#030a05' : C.faint,
+              boxShadow: i === idx ? '0 4px 16px rgba(0,255,136,.45)' : 'none',
+              transition:'all .3s',
+            }}>
+              {i < idx ? '✓' : `0${i+1}`}
+            </div>
+            <span style={{
+              fontSize:10,fontWeight:700,letterSpacing:'.06em',textTransform:'uppercase',
+              color: i === idx ? C.primary : i < idx ? C.cyan : C.faint,
+            }}>{s}</span>
           </div>
-          <span style={{
-            fontSize:10,fontWeight:700,letterSpacing:'.06em',textTransform:'uppercase',
-            color: C.primary,
-          }}>Details</span>
+          {i < 1 && (
+            <div style={{
+              width:72,height:2,
+              background: idx > 0
+                ? 'linear-gradient(90deg,#00d4ff,#00ff88)'
+                : 'rgba(255,255,255,.06)',
+              borderRadius:2,margin:'0 12px 18px',
+              transition:'background .4s',
+            }} />
+          )}
         </div>
-      </div>
+      ))}
     </div>
   );
 }
@@ -202,6 +218,7 @@ function OrderSummary({
 const CheckoutPage = ({ productId }: { productId: string }) => {
   const product = CONFIG.getProductById(productId);
 
+  const [phase, setPhase] = useState<Phase>('info');
   const [name,      setName]      = useState('');
   const [email,     setEmail]     = useState('');
   const [nameErr,   setNameErr]   = useState('');
@@ -209,10 +226,11 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
   const [couponCode, setCouponCode] = useState('');
   const [couponMsg,  setCouponMsg]  = useState('');
   const [appliedCoupon, setApplied] = useState<any>(null);
+  const [paymentData, setPaymentData] = useState<{ paybisUrl: string; transakUrl: string; orderId: string } | null>(null);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+  }, [phase]);
 
   if (!product) {
     return (
@@ -239,7 +257,7 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
     }
   };
 
-  const handleContinue = async () => {
+const handleContinue = async () => {
     let valid = true;
     if (!name.trim() || name.trim().length < 2) {
       setNameErr('Full name is required'); valid = false;
@@ -270,16 +288,16 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
         throw new Error(data.error || 'Failed to create order');
       }
 
-      // Store order ID for reference
+      // Store order ID and payment URLs for reference
       sessionStorage.setItem('cognibooks_order_id', data.orderId);
-      
-      // Redirect to PayBis (default) - user can choose on payment page
-      window.location.href = data.paybisUrl;
+      setPaymentData({ paybisUrl: data.paybisUrl, transakUrl: data.transakUrl, orderId: data.orderId });
+      setPhase('payment');
     } catch (err) {
       console.error('Order creation failed:', err);
       alert(err.message || 'Failed to create order. Please try again.');
       
       // Reset button
+      const btn = document.querySelector('button[type="submit"]');
       if (btn) {
         btn.disabled = false;
         btn.textContent = 'Continue to Payment →';
@@ -330,7 +348,7 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
       }}>
 
         {/* Steps */}
-        <Steps />
+        <Steps phase={phase} />
 
         {/* ── ORDER SUMMARY CARD (always visible) ── */}
         <div style={{
@@ -406,7 +424,97 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
             🔒 256-bit SSL encrypted · Your info is never sold or shared
           </p>
         </div>
-        
+      </div>
+
+      {/* ── STEP 2: Payment Method ── */}
+      {phase === 'payment' && paymentData && (
+        <div style={{
+          background:C.card,border:`1px solid ${C.border}`,
+          borderRadius:20,padding:'28px 24px',
+          backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',
+        }}>
+          <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20 }}>
+            <h2 style={{ fontSize:20,fontWeight:800,color:C.text,margin:0 }}>Payment Method</h2>
+            <button onClick={() => setPhase('info')} style={{
+              padding:'6px 14px',borderRadius:8,border:`1px solid ${C.border}`,
+              background:'rgba(255,255,255,.04)',color:C.muted,
+              fontSize:12,fontWeight:600,cursor:'pointer',
+            }}>← Back</button>
+          </div>
+
+          <div style={{
+            background:'rgba(255,255,255,.03)',border:`1px solid ${C.border}`,
+            borderRadius:10,padding:'10px 14px',marginBottom:20,
+            fontSize:13,color:C.muted,
+          }}>
+            Paying as: <strong style={{ color:C.text }}>{name}</strong>
+            {' · '}<span style={{ color:C.muted }}>{email}</span>
+          </div>
+
+          <div style={{ display:'flex',flexDirection:'column',gap:14 }}>
+            <a href={paymentData.paybisUrl} target="_blank" rel="noopener noreferrer" style={{
+              width:'100%',padding:'18px 24px',border:'none',borderRadius:16,
+              background:`linear-gradient(135deg,${C.primary},${C.primaryHover})`,
+              color:'#030a05',fontSize:16,fontWeight:800,
+              fontFamily:"'Inter', system-ui, sans-serif",
+              cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:12,
+              boxShadow:`0 6px 28px rgba(0,255,136,.35), 0 0 0 1px rgba(0,255,136,.15)`,
+              textDecoration:'none',transition:'transform .15s, box-shadow .15s',
+            }}
+            onMouseOver={e => {
+              const btn = e.currentTarget as HTMLAnchorElement;
+              btn.style.transform = 'translateY(-2px)';
+              btn.style.boxShadow = `0 10px 36px rgba(0,255,136,.45), 0 0 0 1px rgba(0,255,136,.2)`;
+            }}
+            onMouseOut={e => {
+              const btn = e.currentTarget as HTMLAnchorElement;
+              btn.style.transform = 'translateY(0)';
+              btn.style.boxShadow = `0 6px 28px rgba(0,255,136,.35), 0 0 0 1px rgba(0,255,136,.15)`;
+            }}
+            onMouseDown={e => {
+              (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(1px) scale(.99)';
+            }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.68-.35.68-.78 0-.39-.01-1.69-.01-3.33-2.78.6-3.37-1.34-3.37-1.34-.45-1.15-1.11-1.46-1.11-1.46-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.69.92.69 1.85 0 1.33-.01 2.41-.01 2.74 0 .43.18.86.69.78A10.02 10.02 0 0022 12c0-5.52-4.48-10-10-10z"/>
+              </svg>
+              <span>Credit/Debit Card (PayPal or Card)</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+
+            <a href={paymentData.transakUrl} target="_blank" rel="noopener noreferrer" style={{
+              width:'100%',padding:'16px 24px',
+              border:`1.5px solid ${C.cyan}`,borderRadius:16,
+              background:'rgba(0,212,255,.08)',color:C.cyan,
+              fontSize:15,fontWeight:700,fontFamily:"'Inter', system-ui, sans-serif",
+              cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:10,
+              textDecoration:'none',transition:'all .2s',
+            }}
+            onMouseOver={e => {
+              const btn = e.currentTarget as HTMLAnchorElement;
+              btn.style.background = 'rgba(0,212,255,.15)';
+              btn.style.borderColor = C.cyan;
+              btn.style.boxShadow = '0 0 20px rgba(0,212,255,.15)';
+              btn.style.transform = 'translateY(-1px)';
+            }}
+            onMouseOut={e => {
+              const btn = e.currentTarget as HTMLAnchorElement;
+              btn.style.background = 'rgba(0,212,255,.08)';
+              btn.style.borderColor = C.cyan;
+              btn.style.boxShadow = 'none';
+              btn.style.transform = 'translateY(0)';
+            }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/><path d="M16 14h-3v3h3v-3"/><path d="M8 14H5v3h3v-3"/>
+              </svg>
+              <span>Master Card / Visa Card / Apple Pay / Google Pay</span>
+            </a>
+          </div>
+        </div>
+      )}
+
+        </div>
       </div>
     </div>
   );
