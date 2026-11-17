@@ -1,0 +1,124 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Check Node install",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Write-Output 'task-runner-ok'; Get-Command node,npm,winget,curl.exe -ErrorAction SilentlyContinue | Select-Object Name,Source"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Download verified Node runtime",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$ErrorActionPreference='Stop'; $version='v22.12.0'; $base=\"https://nodejs.org/dist/$version\"; $archive=Join-Path $env:TEMP \"node-$version-win-x64.zip\"; $checksums=Join-Path $env:TEMP \"node-$version-SHASUMS256.txt\"; curl.exe -fL \"$base/node-$version-win-x64.zip\" -o $archive; if ($LASTEXITCODE -ne 0) { throw 'Node archive download failed' }; curl.exe -fL \"$base/SHASUMS256.txt\" -o $checksums; if ($LASTEXITCODE -ne 0) { throw 'Node checksum download failed' }; $line=Select-String -Path $checksums -Pattern \"node-$version-win-x64.zip\\s*$\" | Select-Object -First 1; $expected=($line.Line -split '\\s+')[0]; $actual=(Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant(); if ($actual -ne $expected) { throw \"Node archive SHA-256 mismatch: expected $expected, got $actual\" }; Expand-Archive -LiteralPath $archive -DestinationPath $env:TEMP -Force; $install=Join-Path $env:TEMP \"node-$version-win-x64\"; & (Join-Path $install 'node.exe') --version; & (Join-Path $install 'npm.cmd') --version"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Fetch Node archive",
+			"type": "shell",
+			"command": "curl.exe",
+			"args": [
+				"-fL",
+				"https://nodejs.org/dist/v22.12.0/node-v22.12.0-win-x64.zip",
+				"-o",
+				"C:\\Users\\Abeel Computer\\AppData\\Local\\Temp\\node-v22.12.0-win-x64.zip"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Inspect Node artifacts",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-ChildItem $env:TEMP -Filter 'node-v22.12.0*' | Select-Object Name,Length; Get-Process curl -ErrorAction SilentlyContinue | Select-Object Id,CPU,StartTime"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Verify Node MSI",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Select-String -Path \"$env:TEMP\\node-v22.12.0-SHASUMS256.txt\" -Pattern 'node-v22.12.0-x64.msi'; Get-AuthenticodeSignature \"$env:TEMP\\node-v22.12.0-x64.msi\" | Select-Object Status,StatusMessage,SignerCertificate; Get-Item \"$env:TEMP\\node-v22.12.0-x64.msi\" | Select-Object Length,LastWriteTime"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Verify Node MSI checksum",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$sumFile=Join-Path $env:TEMP 'node-v22.12.0-SHASUMS256.txt'; $msi=Join-Path $env:TEMP 'node-v22.12.0-x64.msi'; $entry=Get-Content $sumFile | Where-Object { $_.EndsWith('node-v22.12.0-x64.msi') } | Select-Object -First 1; $expected=$entry.Substring(0,64); $actual=(Get-FileHash $msi -Algorithm SHA256).Hash.ToLowerInvariant(); Write-Output \"Expected: $expected\"; Write-Output \"Actual:   $actual\"; if ($actual -ne $expected) { throw 'MSI checksum mismatch' }"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Hash Node MSI",
+			"type": "shell",
+			"command": "certutil.exe",
+			"args": [
+				"-hashfile",
+				"C:\\Users\\Abeel Computer\\AppData\\Local\\Temp\\node-v22.12.0-x64.msi",
+				"SHA256"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Hash official Node ZIP",
+			"type": "shell",
+			"command": "certutil.exe",
+			"args": [
+				"-hashfile",
+				"C:\\Users\\Abeel Computer\\AppData\\Local\\Temp\\node-v22.12.0-win-x64.zip",
+				"SHA256"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Extract portable Node",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Expand-Archive -LiteralPath \"$env:TEMP\\node-v22.12.0-win-x64.zip\" -DestinationPath $env:TEMP -Force; & \"$env:TEMP\\node-v22.12.0-win-x64\\node.exe\" --version; & \"$env:TEMP\\node-v22.12.0-win-x64\\npm.cmd\" --version"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Install locked dependencies",
+			"type": "shell",
+			"command": "C:\\Users\\Abeel Computer\\AppData\\Local\\Temp\\node-v22.12.0-win-x64\\npm.cmd",
+			"args": [
+				"ci"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}

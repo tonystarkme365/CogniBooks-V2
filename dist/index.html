@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/webp" href="/logo.webp" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#07070d" />
+    <meta name="description" content="CogniBooks – Premium AI prompt collections. Master AI. Transform Your Life." />
+    <meta property="og:title" content="CogniBooks – Master AI. Transform Your Life." />
+    <meta property="og:description" content="Premium curated ChatGPT prompt collections for professionals who want to unlock AI's full potential." />
+    <meta property="og:type" content="website" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet" />
+    <title>CogniBooks – Master AI. Transform Your Life.</title>
+    <style>
+      *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+      html{scroll-behavior:smooth}
+      body{background:#07070d;color:#f0f0ff;font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+      #root{min-height:100vh}
+
+      /* ── Loading screen with real logo ── */
+      .cb-init{
+        position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+        background:#07070d;z-index:9999;flex-direction:column;gap:20px
+      }
+      .cb-logo-wrap{
+        position:relative;display:flex;align-items:center;justify-content:center;
+        width:80px;height:80px
+      }
+      /* Animated neon rings */
+      .cb-ring{
+        position:absolute;inset:0;border-radius:50%;
+        animation:ringPulse 2s ease-in-out infinite
+      }
+      .cb-ring:nth-child(1){
+        box-shadow:0 0 0 2px #00ff88,0 0 12px 4px rgba(0,255,136,.5);
+        animation-delay:0s
+      }
+      .cb-ring:nth-child(2){
+        box-shadow:0 0 0 4px #00d4ff,0 0 18px 6px rgba(0,212,255,.35);
+        animation-delay:.35s
+      }
+      .cb-ring:nth-child(3){
+        box-shadow:0 0 0 6px #ff00ff,0 0 24px 8px rgba(255,0,255,.25);
+        animation-delay:.7s
+      }
+      .cb-logo-img{
+        width:68px;height:68px;border-radius:50%;object-fit:cover;
+        position:relative;z-index:2;
+        box-shadow:0 0 28px rgba(0,255,136,.3)
+      }
+      .cb-spin{
+        width:32px;height:32px;
+        border:2.5px solid rgba(0,255,136,.15);
+        border-top-color:#00ff88;border-radius:50%;
+        animation:spin .7s linear infinite
+      }
+      .cb-tagline{
+        font-family:'Space Grotesk',sans-serif;font-size:13px;
+        color:rgba(136,136,170,.7);letter-spacing:.08em;font-weight:600
+      }
+      @keyframes spin{to{transform:rotate(360deg)}}
+      @keyframes ringPulse{
+        0%,100%{opacity:.6;transform:scale(1)}
+        50%{opacity:1;transform:scale(1.04)}
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-B2_fRC9Y.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/crossmint-DgS4CUi0.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-CWneES31.css">
+  </head>
+  <body>
+    <div id="root">
+      <div class="cb-init">
+        <div class="cb-logo-wrap">
+          <div class="cb-ring"></div>
+          <div class="cb-ring"></div>
+          <div class="cb-ring"></div>
+          <img class="cb-logo-img" src="/logo.webp" alt="CogniBooks" />
+        </div>
+        <div class="cb-spin"></div>
+        <div class="cb-tagline">COGNIBOOKS</div>
+      </div>
+    </div>
+  </body>
+</html>
