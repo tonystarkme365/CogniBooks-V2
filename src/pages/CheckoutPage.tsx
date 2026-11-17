@@ -402,12 +402,12 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
               Continue to Payment →
             </button>
 
-            <p style={{ textAlign:'center',fontSize:12,color:C.faint,marginTop:12 }}>
+<p style={{ textAlign:'center',fontSize:12,color:C.faint,marginTop:12 }}>
               🔒 256-bit SSL encrypted · Your info is never sold or shared
-</p>
+            </p>
           </div>
-        >
-        
+          
+        </div>
       </div>
     </div>
   );
