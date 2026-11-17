@@ -218,8 +218,6 @@ function OrderSummary({
   );
 }
 
-);
-
 // ── Main CheckoutPage ─────────────────────────────────────────────────────
 const CheckoutPage = ({ productId }: { productId: string }) => {
   const product = CONFIG.getProductById(productId);
