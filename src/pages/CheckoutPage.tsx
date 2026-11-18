@@ -513,8 +513,7 @@ const handleContinue = async () => {
           </div>
         </div>
       )}
-
-        </div>
+      
       </div>
     </div>
   );
