@@ -15,13 +15,32 @@ export default defineConfig({
     target: ["es2020", "chrome95", "firefox91", "safari14"],
     minify: "esbuild",
     cssMinify: true,
+    sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ["react", "react-dom"],
         },
       },
+      onwarn(warning, warn) {
+        // Log all warnings, suppress only known benign ones
+        if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
+        if (warning.code === 'UNUSED_EXTERNAL_IMPORT') return;
+        warn(warning);
+      },
     },
     chunkSizeWarningLimit: 1200,
+    // Verbose esbuild logging
+    reportCompressedSize: true,
   },
+  esbuild: {
+    logLevel: 'verbose',
+    logLimit: 0,
+    treeShaking: true,
+    pure: ['console.log', 'console.debug'],
+  },
+  // Enable all logging
+  logLevel: 'info',
+  // Disable silent mode
+  silent: false,
 });
