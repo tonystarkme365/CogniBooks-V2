@@ -134,10 +134,6 @@ export const slugify = (text) => {
     .trim();
 };
 
-const SLUGIFY_CLEAN_REGEX = /[^\w\s-]/g;
-const SLUGIFY_SPACES_REGEX = /\s+/g;
-const SLUGIFY_DASHES_REGEX = /-+/g;
-
 export const truncate = (text, maxLength, suffix = '...') => {
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength).trim() + suffix;
@@ -150,8 +146,6 @@ export const capitalize = (text) => {
 export const capitalizeWords = (text) => {
   return text.replace(WORD_BOUNDARY_REGEX, char => char.toUpperCase());
 };
-
-const WORD_BOUNDARY_REGEX = /\b\w/g;
 
 export const escapeHtml = (text) => {
   const div = document.createElement('div');
