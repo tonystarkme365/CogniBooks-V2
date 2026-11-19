@@ -519,4 +519,7 @@ const handleContinue = async () => {
   );
 };
 
+// Force parser reset
+void 0;
+
 export default CheckoutPage;
