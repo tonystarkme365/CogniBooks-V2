@@ -395,8 +395,6 @@ export const copyToClipboard = async (text) => {
 // ============================================
 // DEVICE DETECTION
 // ============================================
-const MOBILE_UA_REGEX = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
-const TABLET_UA_REGEX = /iPad|Android/i;
 
 export const isMobile = () => {
   return MOBILE_UA_REGEX.test(navigator.userAgent);
@@ -409,8 +407,6 @@ export const isTablet = () => {
 export const isDesktop = () => {
   return !isMobile() && !isTablet();
 };
-
-// ============================================
 // NUMBER UTILITIES
 // ============================================
 export const clamp = (num, min, max) => {
@@ -480,7 +476,6 @@ export const generateShortId = () => {
 // ============================================
 // COLOR UTILITIES
 // ============================================
-const HEX_COLOR_REGEX = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i;
 
 export const hexToRgb = (hex) => {
   const result = HEX_COLOR_REGEX.exec(hex);
