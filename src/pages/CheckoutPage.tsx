@@ -1,10 +1,9 @@
 /**
- * CogniBooks – CheckoutPage  v5.0
+ * CogniBooks – CheckoutPage  v6.0
  * ─────────────────────────────────────────────────────────
- * Single-column layout (no split screen)
+ * Single-column layout
  * Step 1 → capture name + email
- * Step 2 → PaymentSection with PayBis (PayPal/Card) & Transak (Card/Apple Pay/Google Pay)
- * Redirects to external providers; USDC sent to wallet on Polygon
+ * Step 2 → PaymentMethodButtons (PayBis & Transak)
  * ─────────────────────────────────────────────────────────
  */
 
@@ -13,8 +12,10 @@ import CONFIG from '../config.js';
 import { formatPrice } from '../utils.js';
 import { PaymentMethodButtons } from '@/components/PaymentMethodButtons';
 
-// Module-level regex constant (outside component to avoid esbuild regex parser issues)
+// Module-level constants (no regex, no division, no forward slashes)
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const API_PATH = '/.netlify/functions/create-order';
+const ASPECT_RATIO = 0.5625;
 
 // ── Config ────────────────────────────────────────────────────────────────
 const C = {
@@ -112,7 +113,7 @@ function Field({
   );
 }
 
-// ── Order Summary (used in both steps) ───────────────────────────────────
+// ── Order Summary ─────────────────────────────────────────────────────────
 function OrderSummary({
   product, total, discount, appliedCoupon, couponCode,
   setCouponCode, onApply, couponMsg, locked
@@ -120,13 +121,11 @@ function OrderSummary({
   const discount_amt = product.originalPrice - product.price;
   return (
     <div style={{ display:'flex',flexDirection:'column',gap:0 }}>
-      {/* Product row */}
       <div style={{ display:'flex',gap:14,alignItems:'flex-start',marginBottom:18 }}>
-        {/* 9:16 thumbnail */}
         <div style={{
           width:64,flexShrink:0,borderRadius:10,overflow:'hidden',
           boxShadow:'0 4px 18px rgba(0,0,0,.55)',
-          aspectRatio: 9/16,
+          aspectRatio: ASPECT_RATIO,
         }}>
           <img src={product.cover} alt={product.title}
             style={{ width:'100%',height:'100%',objectFit:'cover',display:'block' }} />
@@ -143,7 +142,6 @@ function OrderSummary({
         </div>
       </div>
 
-      {/* Price breakdown */}
       <div style={{ borderTop:`1px solid ${C.border}`,paddingTop:14,display:'flex',flexDirection:'column',gap:9 }}>
         <div style={{ display:'flex',justifyContent:'space-between',fontSize:13 }}>
           <span style={{ color:C.muted }}>List price</span>
@@ -172,7 +170,6 @@ function OrderSummary({
         </div>
       </div>
 
-      {/* Coupon */}
       {!locked && (
         <div style={{ marginTop:16 }}>
           <p style={{ fontSize:10,fontWeight:700,color:C.muted,marginBottom:10,
@@ -204,7 +201,6 @@ function OrderSummary({
         </div>
       )}
 
-      {/* Trust badges */}
       <div style={{ display:'flex',gap:8,flexWrap:'wrap',justifyContent:'center',marginTop:16 }}>
         {['🔒 Secure','⚡ Instant','✅ Guaranteed'].map(t => (
           <span key={t} style={{
@@ -247,7 +243,7 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
   }
 
   const discountAmt = CONFIG.calculateDiscount(product.price, appliedCoupon);
-  const total       = Math.max(0.75, product.price - discountAmt); // Crossmint minimum $0.75
+  const total       = Math.max(0.75, product.price - discountAmt);
 
   const applyCoupon = () => {
     if (!couponCode.trim()) { setCouponMsg('Please enter a coupon code.'); return; }
@@ -261,18 +257,16 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
     }
   };
 
-const handleContinue = async () => {
+  const handleContinue = async () => {
     let valid = true;
     if (!name.trim() || name.trim().length < 2) {
       setNameErr('Full name is required'); valid = false;
     } else { setNameErr(''); }
-    const emailRx = EMAIL_REGEX;
-    if (!emailRx.test(email.trim())) {
+    if (!EMAIL_REGEX.test(email.trim())) {
       setEmailErr('Enter a valid email address'); valid = false;
     } else { setEmailErr(''); }
     if (!valid) return;
 
-    // Show loading state
     const btn = document.querySelector('button[type="submit"]');
     if (btn) {
       btn.disabled = true;
@@ -280,27 +274,25 @@ const handleContinue = async () => {
     }
 
     try {
-      const res = await fetch('/.netlify/functions/create-order', {
+      const res = await fetch(API_PATH, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId, email: email.trim(), name: name.trim() }),
       });
-      
+
       const data = await res.json();
-      
+
       if (!res.ok) {
         throw new Error(data.error || 'Failed to create order');
       }
 
-      // Store order ID and payment URLs for reference
       sessionStorage.setItem('cognibooks_order_id', data.orderId);
       setPaymentData({ paybisUrl: data.paybisUrl, transakUrl: data.transakUrl, orderId: data.orderId });
       setPhase('payment');
     } catch (err) {
       console.error('Order creation failed:', err);
       alert(err.message || 'Failed to create order. Please try again.');
-      
-      // Reset button
+
       const btn = document.querySelector('button[type="submit"]');
       if (btn) {
         btn.disabled = false;
@@ -312,7 +304,6 @@ const handleContinue = async () => {
   return (
     <div style={{ minHeight:'100vh', background:'var(--clr-bg)', position:'relative' }}>
 
-      {/* Ambient blobs */}
       <div style={{ position:'fixed',inset:0,pointerEvents:'none',zIndex:0,overflow:'hidden' }} aria-hidden="true">
         <div style={{ position:'absolute',width:440,height:440,borderRadius:'50%',
           background:'#00ff88',filter:'blur(140px)',opacity:.03,top:-120,right:-80 }} />
@@ -320,7 +311,6 @@ const handleContinue = async () => {
           background:'#00d4ff',filter:'blur(130px)',opacity:.028,bottom:'10%',left:-60 }} />
       </div>
 
-      {/* Header */}
       <header style={{
         position:'sticky',top:0,zIndex:100,
         background:'rgba(7,7,13,.92)',
@@ -343,7 +333,6 @@ const handleContinue = async () => {
         </span>
       </header>
 
-      {/* Single-column body */}
       <div style={{
         maxWidth:560,margin:'0 auto',
         padding:'32px 20px 60px',
@@ -351,10 +340,8 @@ const handleContinue = async () => {
         position:'relative',zIndex:1,
       }}>
 
-        {/* Steps */}
         <Steps phase={phase} />
 
-        {/* ── ORDER SUMMARY CARD (always visible) ── */}
         <div style={{
           background:C.card,border:`1px solid ${C.border}`,
           borderRadius:20,padding:22,
@@ -375,51 +362,50 @@ const handleContinue = async () => {
           />
         </div>
 
-        {/* ── STEP 1: Your Details ── */}
         <div style={{
           background:C.card,border:`1px solid ${C.border}`,
           borderRadius:20,padding:'28px 24px',
           backdropFilter:'blur(20px)',WebkitBackdropFilter:'blur(20px)',
         }}>
-            <h2 style={{ fontSize:22,fontWeight:800,color:C.text,marginBottom:6 }}>Your Details</h2>
-            <p style={{ fontSize:13,color:C.muted,marginBottom:24 }}>
-              We'll send your download link to this email instantly after purchase.
-            </p>
+          <h2 style={{ fontSize:22,fontWeight:800,color:C.text,marginBottom:6 }}>Your Details</h2>
+          <p style={{ fontSize:13,color:C.muted,marginBottom:24 }}>
+            We'll send your download link to this email instantly after purchase.
+          </p>
 
-            <Field
-              label="Full Name"
-              value={name}
-              onChange={setName}
-              error={nameErr}
-              placeholder="Jane Smith"
-              autoComplete="name"
-            />
-            <Field
-              label="Email Address"
-              type="email"
-              value={email}
-              onChange={setEmail}
-              error={emailErr}
-              placeholder="jane@example.com"
-              autoComplete="email"
-            />
+          <Field
+            label="Full Name"
+            value={name}
+            onChange={setName}
+            error={nameErr}
+            placeholder="Jane Smith"
+            autoComplete="name"
+          />
+          <Field
+            label="Email Address"
+            type="email"
+            value={email}
+            onChange={setEmail}
+            error={emailErr}
+            placeholder="jane@example.com"
+            autoComplete="email"
+          />
 
-<button onClick={handleContinue} style={{
-              width:'100%',padding:'16px',border:'none',borderRadius:14,
-              background:'linear-gradient(135deg,#00ff88,#00cc6a)',
-              color:'#030a05',fontSize:16,fontWeight:800,cursor:'pointer',
-              boxShadow:'0 4px 24px rgba(0,255,136,.35)',
-              transition:'transform .2s,box-shadow .2s',
-              marginTop:4,
-            }}
-            onMouseOver={e => {
-              (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)';
-              (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 32px rgba(0,255,136,.5)';
-            }}
-            onMouseOut={e => {
-              (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
-              (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 24px rgba(0,255,136,.35)';
-            }}
+          <button onClick={handleContinue} style={{
+            width:'100%',padding:'16px',border:'none',borderRadius:14,
+            background:'linear-gradient(135deg,#00ff88,#00cc6a)',
+            color:'#030a05',fontSize:16,fontWeight:800,cursor:'pointer',
+            boxShadow:'0 4px 24px rgba(0,255,136,.35)',
+            transition:'transform .2s,box-shadow .2s',
+            marginTop:4,
+          }}
+          onMouseOver={e => {
+            (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)';
+            (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 32px rgba(0,255,136,.5)';
+          }}
+          onMouseOut={e => {
+            (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
+            (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 24px rgba(0,255,136,.35)';
+          }}
           >
             Continue to Payment →
           </button>
@@ -428,24 +414,23 @@ const handleContinue = async () => {
             🔒 256-bit SSL encrypted · Your info is never sold or shared
           </p>
         </div>
-      </div>
 
-{/* ── STEP 2: Payment Method ── */}
-      {phase === 'payment' && paymentData && (
-        <PaymentMethodButtons
-          paybisUrl={paymentData.paybisUrl}
-          transakUrl={paymentData.transakUrl}
-          name={name}
-          email={email}
-          onBack={() => setPhase('info')}
-          primaryColor={C.primary}
-          primaryHover={C.primary}
-          cyanColor={C.cyan}
-        />
-      )}
+        {phase === 'payment' && paymentData && (
+          <PaymentMethodButtons
+            paybisUrl={paymentData.paybisUrl}
+            transakUrl={paymentData.transakUrl}
+            name={name}
+            email={email}
+            onBack={() => setPhase('info')}
+            primaryColor={C.primary}
+            primaryHover={C.primary}
+            cyanColor={C.cyan}
+          />
+        )}
 
       </div>
     </div>
   );
 };
+
 export default CheckoutPage;
