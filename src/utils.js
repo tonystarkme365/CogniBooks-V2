@@ -4,16 +4,28 @@
 // Swiss Army knife of helper functions
 
 // ============================================
+// REGEX CONSTANTS (module-level to avoid esbuild regex parser issues)
+// ============================================
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const NON_DIGIT_REGEX = /\D/g;
+const SLUGIFY_CLEAN_REGEX = /[^\w\s-]/g;
+const SLUGIFY_SPACES_REGEX = /\s+/g;
+const SLUGIFY_DASHES_REGEX = /-+/g;
+const WORD_BOUNDARY_REGEX = /\b\w/g;
+const MOBILE_UA_REGEX = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+const TABLET_UA_REGEX = /iPad|Android/i;
+const HEX_COLOR_REGEX = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i;
+
+// ============================================
 // EMAIL & VALIDATION
 // ============================================
 export const isValidEmail = (email) => {
-  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return regex.test(email);
+  return EMAIL_REGEX.test(email);
 };
 
 export const isValidCreditCard = (cardNumber) => {
   // Luhn algorithm
-  const digits = cardNumber.replace(/\D/g, '');
+  const digits = cardNumber.replace(NON_DIGIT_REGEX, '');
   if (digits.length < 13 || digits.length > 19) return false;
   
   let sum = 0;
@@ -116,11 +128,15 @@ export const getTimeRemaining = (endTime) => {
 export const slugify = (text) => {
   return text
     .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
+    .replace(SLUGIFY_CLEAN_REGEX, '')
+    .replace(SLUGIFY_SPACES_REGEX, '-')
+    .replace(SLUGIFY_DASHES_REGEX, '-')
     .trim();
 };
+
+const SLUGIFY_CLEAN_REGEX = /[^\w\s-]/g;
+const SLUGIFY_SPACES_REGEX = /\s+/g;
+const SLUGIFY_DASHES_REGEX = /-+/g;
 
 export const truncate = (text, maxLength, suffix = '...') => {
   if (text.length <= maxLength) return text;
@@ -132,8 +148,10 @@ export const capitalize = (text) => {
 };
 
 export const capitalizeWords = (text) => {
-  return text.replace(/\b\w/g, char => char.toUpperCase());
+  return text.replace(WORD_BOUNDARY_REGEX, char => char.toUpperCase());
 };
+
+const WORD_BOUNDARY_REGEX = /\b\w/g;
 
 export const escapeHtml = (text) => {
   const div = document.createElement('div');
@@ -383,12 +401,15 @@ export const copyToClipboard = async (text) => {
 // ============================================
 // DEVICE DETECTION
 // ============================================
+const MOBILE_UA_REGEX = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+const TABLET_UA_REGEX = /iPad|Android/i;
+
 export const isMobile = () => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  return MOBILE_UA_REGEX.test(navigator.userAgent);
 };
 
 export const isTablet = () => {
-  return /iPad|Android/i.test(navigator.userAgent) && !isMobile();
+  return TABLET_UA_REGEX.test(navigator.userAgent) && !isMobile();
 };
 
 export const isDesktop = () => {
@@ -465,8 +486,10 @@ export const generateShortId = () => {
 // ============================================
 // COLOR UTILITIES
 // ============================================
+const HEX_COLOR_REGEX = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i;
+
 export const hexToRgb = (hex) => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  const result = HEX_COLOR_REGEX.exec(hex);
   return result ? {
     r: parseInt(result[1], 16),
     g: parseInt(result[2], 16),
