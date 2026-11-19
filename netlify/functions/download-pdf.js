@@ -2,6 +2,8 @@ import { verifyJWT, invalidateToken } from './utils/jwt.js';
 import { getProduct } from './utils/db.js';
 import { getPDFStream, getPDFBuffer, pdfExists } from './utils/storage.js';
 
+const FILENAME_SANITIZE_REGEX = /[^a-zA-Z0-9]/g;
+
 export async function handler(event) {
   const { token } = event.queryStringParameters || {};
 
@@ -70,7 +72,7 @@ export async function handler(event) {
     };
   }
 
-  const filename = `${product.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+  const filename = `${product.title.replace(FILENAME_SANITIZE_REGEX, '_')}.pdf`;
 
   return {
     statusCode: 200,

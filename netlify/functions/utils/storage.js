@@ -2,9 +2,10 @@ import fs from 'fs';
 import path from 'path';
 
 const PDF_DIR = path.join(process.cwd(), 'netlify', 'pdfs');
+const FILENAME_SANITIZE_REGEX = /[^a-zA-Z0-9._-]/g;
 
 export function getPDFPath(filename) {
-  const safeName = path.basename(filename).replace(/[^a-zA-Z0-9._-]/g, '');
+  const safeName = path.basename(filename).replace(FILENAME_SANITIZE_REGEX, '');
   return path.join(PDF_DIR, safeName);
 }
 

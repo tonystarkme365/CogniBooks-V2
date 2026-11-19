@@ -4,6 +4,9 @@ import { signJWT } from './utils/jwt.js';
 const WALLET = process.env.WALLET_ADDRESS || '0xe4c3a86276c87bbe8b9d8a1aff199bb696b5cf53';
 const SITE_URL = process.env.URL || 'https://cognibook.netlify.app';
 
+// Module-level regex constants
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 function buildPayBisUrl({ amount, orderId, token }) {
   const params = new URLSearchParams({
     amount: amount.toFixed(2),
@@ -43,8 +46,7 @@ export async function handler(event) {
     }
 
     // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!EMAIL_REGEX.test(email)) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Invalid email address' }) };
     }
 

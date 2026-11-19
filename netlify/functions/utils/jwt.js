@@ -3,20 +3,28 @@ import crypto from 'crypto';
 const SECRET = process.env.JWT_SECRET || 'cognibooks-dev-secret-change-in-production-32chars';
 const TOKEN_STORE = new Map();
 
+// Module-level regex constants
+const BASE64_PAD_REGEX = /=/g;
+const BASE64_PLUS_REGEX = /\+/g;
+const BASE64_SLASH_REGEX = /\//g;
+const BASE64URL_DASH_REGEX = /-/g;
+const BASE64URL_UNDERSCORE_REGEX = /_/g;
+const DURATION_REGEX = /^(\d+)([smhd])$/;
+
 function base64urlEncode(str) {
   return Buffer.from(str).toString('base64')
-    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+    .replace(BASE64_PAD_REGEX, '').replace(BASE64_PLUS_REGEX, '-').replace(BASE64_SLASH_REGEX, '_');
 }
 
 function base64urlDecode(str) {
-  str = str.replace(/-/g, '+').replace(/_/g, '/');
+  str = str.replace(BASE64URL_DASH_REGEX, '+').replace(BASE64URL_UNDERSCORE_REGEX, '/');
   const pad = str.length % 4;
   if (pad) str += '='.repeat(4 - pad);
   return Buffer.from(str, 'base64').toString();
 }
 
 function parseDuration(str) {
-  const match = str.match(/^(\d+)([smhd])$/);
+  const match = str.match(DURATION_REGEX);
   if (!match) return 900;
   const value = parseInt(match[1]);
   const unit = { s: 1, m: 60, h: 3600, d: 86400 }[match[2]];
