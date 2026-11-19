@@ -64,7 +64,11 @@ const HomePage = () => {
     return () => clearInterval(t);
   }, [showPopup]);
 
-  const fmtCD = (s: number) => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+  const fmtCD = (s: number) => {
+    const mins = Math.floor(s / 60);
+    const secs = String(s % 60).padStart(2, '0');
+    return `${mins}:${secs}`;
+  };
 
   const handleCopy = async () => {
     const ok = await copyToClipboard('COGNIBOOKS20');

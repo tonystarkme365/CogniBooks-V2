@@ -14,7 +14,7 @@ import { PaymentMethodButtons } from '@/components/PaymentMethodButtons';
 
 // Module-level constants (no regex, no division, no forward slashes)
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const API_PATH = '/.netlify/functions/create-order';
+const API_PATH = ".netlify/functions/create-order";
 const ASPECT_RATIO = 0.5625;
 
 // ── Config ────────────────────────────────────────────────────────────────
