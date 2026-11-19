@@ -7,6 +7,10 @@ const SITE_URL = process.env.URL || 'https://cognibook.netlify.app';
 // Module-level regex constants
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// PayBis & Transak API keys (set in Netlify env vars)
+const PAYBIS_API_KEY = process.env.PAYBIS_API_KEY || '';
+const TRANSAK_API_KEY = process.env.TRANSAK_API_KEY || '';
+
 function buildPayBisUrl({ amount, orderId, token }) {
   const params = new URLSearchParams({
     amount: amount.toFixed(2),
@@ -14,7 +18,12 @@ function buildPayBisUrl({ amount, orderId, token }) {
     wallet: WALLET,
     network: 'polygon',
   });
-  return `https://paybis.com/buy/usdc/polygon?${params.toString()}`;
+  // PayBis widget URL format
+  const baseUrl = PAYBIS_API_KEY 
+    ? 'https://paybis.com/widget'
+    : 'https://paybis.com/buy/usdc/polygon';
+  if (PAYBIS_API_KEY) params.set('api_key', PAYBIS_API_KEY);
+  return `${baseUrl}?${params.toString()}`;
 }
 
 function buildTransakUrl({ amount, orderId, token }) {
@@ -25,6 +34,8 @@ function buildTransakUrl({ amount, orderId, token }) {
     network: 'polygon',
     cryptoCurrency: 'USDC',
   });
+  // Transak requires API key for widget
+  if (TRANSAK_API_KEY) params.set('apiKey', TRANSAK_API_KEY);
   return `https://global.transak.com/?${params.toString()}`;
 }
 
