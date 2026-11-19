@@ -12,6 +12,16 @@ import { useState, useEffect, useId } from 'react';
 import CONFIG from '../config.js';
 import { formatPrice } from '../utils.js';
 
+// SVG path constants (defined outside JSX to avoid esbuild regex parser issues)
+const PAYBIS_SVG_PATH = "M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.68-.35.68-.78 0-.39-.01-1.69-.01-3.33-2.78.6-3.37-1.34-3.37-1.34-.45-1.15-1.11-1.46-1.11-1.46-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.69.92.69 1.85 0 1.33-.01 2.41-.01 2.74 0 .43.18.86.69.78A10.02 10.02 0 0022 12c0-5.52-4.48-10-10-10z";
+const PAYBIS_ARROW_SVG = "M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6";
+const PAYBIS_POLYLINE_SVG = "15 3 21 3 21 9";
+const PAYBIS_LINE_SVG = "10 14 21 3";
+const TRANSAK_SVG_RECT = "1 4 22 16 2 2";
+const TRANSAK_SVG_LINE = "1 10 23 10";
+const TRANSAK_SVG_PATH1 = "M16 14h-3v3h3v-3";
+const TRANSAK_SVG_PATH2 = "M8 14H5v3h3v-3";
+
 // ── Config ────────────────────────────────────────────────────────────────
 const C = {
   primary:  '#00ff88',
@@ -474,12 +484,16 @@ const handleContinue = async () => {
             onMouseDown={e => {
               (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(1px) scale(.99)';
             }}
-            >
+>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.68-.35.68-.78 0-.39-.01-1.69-.01-3.33-2.78.6-3.37-1.34-3.37-1.34-.45-1.15-1.11-1.46-1.11-1.46-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.69.92.69 1.85 0 1.33-.01 2.41-.01 2.74 0 .43.18.86.69.78A10.02 10.02 0 0022 12c0-5.52-4.48-10-10-10z"/>
+                <path d={PAYBIS_SVG_PATH} />
               </svg>
               <span>Credit/Debit Card (PayPal or Card)</span>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d={PAYBIS_ARROW_SVG} />
+                <polyline points={PAYBIS_POLYLINE_SVG} />
+                <line x1={10} y1={14} x2={21} y2={3} />
+              </svg>
             </a>
 
             <a href={paymentData.transakUrl} target="_blank" rel="noopener noreferrer" style={{
@@ -506,7 +520,10 @@ const handleContinue = async () => {
             }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/><path d="M16 14h-3v3h3v-3"/><path d="M8 14H5v3h3v-3"/>
+                <rect x={1} y={4} width={22} height={16} rx={2} ry={2} />
+                <line x1={1} y1={10} x2={23} y2={10} />
+                <path d={TRANSAK_SVG_PATH1} />
+                <path d={TRANSAK_SVG_PATH2} />
               </svg>
               <span>Master Card / Visa Card / Apple Pay / Google Pay</span>
             </a>
@@ -518,8 +535,4 @@ const handleContinue = async () => {
     </div>
   );
 };
-
-// Force parser reset
-void 0;
-
 export default CheckoutPage;
