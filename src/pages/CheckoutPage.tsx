@@ -13,6 +13,9 @@ import CONFIG from '../config.js';
 import { formatPrice } from '../utils.js';
 import { PaymentMethodButtons } from '@/components/PaymentMethodButtons';
 
+// Module-level regex constant (outside component to avoid esbuild regex parser issues)
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 // ── Config ────────────────────────────────────────────────────────────────
 const C = {
   primary:  '#00ff88',
@@ -263,7 +266,7 @@ const handleContinue = async () => {
     if (!name.trim() || name.trim().length < 2) {
       setNameErr('Full name is required'); valid = false;
     } else { setNameErr(''); }
-    const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRx = EMAIL_REGEX;
     if (!emailRx.test(email.trim())) {
       setEmailErr('Enter a valid email address'); valid = false;
     } else { setEmailErr(''); }
