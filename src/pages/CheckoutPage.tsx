@@ -126,7 +126,7 @@ function OrderSummary({
         <div style={{
           width:64,flexShrink:0,borderRadius:10,overflow:'hidden',
           boxShadow:'0 4px 18px rgba(0,0,0,.55)',
-          aspectRatio:'9/16',
+          aspectRatio: 9/16,
         }}>
           <img src={product.cover} alt={product.title}
             style={{ width:'100%',height:'100%',objectFit:'cover',display:'block' }} />
