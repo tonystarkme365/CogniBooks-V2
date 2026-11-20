@@ -1,5 +1,6 @@
 import { createOrder, getProduct } from './utils/db.js';
 import { signJWT } from './utils/jwt.js';
+import crypto from 'crypto';
 
 const WALLET = process.env.WALLET_ADDRESS || '0xe4c3a86276c87bbe8b9d8a1aff199bb696b5cf53';
 const SITE_URL = process.env.URL || 'https://cognibook.netlify.app';
@@ -7,9 +8,11 @@ const SITE_URL = process.env.URL || 'https://cognibook.netlify.app';
 // Module-level regex constants
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// PayBis & Transak API keys (set in Netlify env vars)
+// PayBis, Transak & MoonPay API keys (set in Netlify env vars)
 const PAYBIS_API_KEY = process.env.PAYBIS_API_KEY || '';
 const TRANSAK_API_KEY = process.env.TRANSAK_API_KEY || '';
+const MOONPAY_API_KEY = process.env.MOONPAY_API_KEY || '';
+const MOONPAY_SECRET_KEY = process.env.MOONPAY_SECRET_KEY || '';
 
 function buildPayBisUrl({ amount, orderId, token }) {
   const params = new URLSearchParams({
@@ -37,6 +40,27 @@ function buildTransakUrl({ amount, orderId, token }) {
   // Transak requires API key for widget
   if (TRANSAK_API_KEY) params.set('apiKey', TRANSAK_API_KEY);
   return `https://global.transak.com/?${params.toString()}`;
+}
+
+function buildMoonPayUrl({ amount, orderId, token }) {
+  const params = new URLSearchParams({
+    apiKey: MOONPAY_API_KEY,
+    baseCurrencyCode: 'usd',
+    baseCurrencyAmount: amount.toFixed(2),
+    currencyCode: 'usdc_polygon',
+    network: 'polygon',
+    walletAddress: WALLET,
+    lockAmount: 'true',
+    externalTransactionId: orderId,
+  });
+  // MoonPay requires secret key for signature
+  if (MOONPAY_SECRET_KEY) {
+    const signature = crypto.createHmac('sha256', MOONPAY_SECRET_KEY)
+      .update(params.toString())
+      .digest('hex');
+    params.set('signature', signature);
+  }
+  return `https://buy.moonpay.com/?${params.toString()}`;
 }
 
 export async function handler(event) {
@@ -76,6 +100,7 @@ export async function handler(event) {
     // Build payment URLs
     const paybisUrl = buildPayBisUrl({ amount: product.price, orderId: order.id, token: paymentToken });
     const transakUrl = buildTransakUrl({ amount: product.price, orderId: order.id, token: paymentToken });
+    const moonpayUrl = buildMoonPayUrl({ amount: product.price, orderId: order.id, token: paymentToken });
 
     return {
       statusCode: 200,
@@ -86,6 +111,7 @@ export async function handler(event) {
         product: { id: product.id, title: product.title },
         paybisUrl,
         transakUrl,
+        moonpayUrl,
         paymentToken,
       }),
     };

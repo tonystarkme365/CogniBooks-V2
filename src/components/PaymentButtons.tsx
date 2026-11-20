@@ -67,6 +67,30 @@ const PROVIDER_CONFIG = {
     color: '#8b5cf6',
     hoverColor: '#7c3aed',
   },
+  coinbase: {
+    label: 'Coinbase (NY & All US States)',
+    description: 'Apple Pay, Google Pay, Card — Works in all 50 states including NY',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-7h10v2H7v-2zm0 4h10v2H7v-2z"/>
+      </svg>
+    ),
+    color: '#0052ff',
+    hoverColor: '#0041cc',
+  },
+  onramper: {
+    label: 'Best Rate (Auto-select)',
+    description: 'Automatically finds the best rate across providers',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 6v6l4 2"/>
+        <path d="M12 6v6l-4 2"/>
+      </svg>
+    ),
+    color: '#8b5cf6',
+    hoverColor: '#7c3aed',
+  },
 };
 
 export function PaymentButtons({
@@ -81,7 +105,7 @@ export function PaymentButtons({
   onPaymentStart,
   onPaymentComplete,
 }: PaymentButtonProps) {
-  const [selectedProvider, setSelectedProvider] = useState<'transak' | 'moonpay' | 'paybis' | 'onramper'>(provider);
+  const [selectedProvider, setSelectedProvider] = useState<'transak' | 'moonpay' | 'paybis' | 'coinbase' | 'onramper'>(provider);
   const [loading, setLoading] = useState<string | null>(null);
 
   const config = PROVIDER_CONFIG[selectedProvider];
@@ -100,29 +124,31 @@ export function PaymentButtons({
         network: 'polygon',
         walletAddress: '0xe4c3a86276c87bbe8b9d8a1aff199bb696b5cf53',
         redirectUrl: redirectUrl || `${window.location.origin}/#success?provider=${selectedProvider}`,
-        email: undefined, // Will be filled from form if needed
+        email: undefined,
       };
 
-      // Import dynamically to avoid SSR issues
       const { PAYMENT_LINKS } = require('@/lib/payments');
       
       switch (selectedProvider) {
         case 'transak':
-          link = PAYMENT_LINKS.transak(mountainParams);
+          link = PAYMENT_LINKS.transak(baseParams);
           break;
         case 'moonpay':
-          link = PAYMENT_LINKS.moonpay(mountainParams);
+          link = PAYMENT_LINKS.moonpay(baseParams);
           break;
         case 'paybis':
-          link = PAYMENT_LINKS.paybis(mountainParams);
+          link = PAYMENT_LINKS.paybis(baseParams);
+          break;
+        case 'coinbase':
+          // Coinbase Onramp: call backend to get session token, then redirect
+          link = `${window.location.origin}/.netlify/functions/coinbase-session?amount=${amount}&redirectUrl=${encodeURIComponent(window.location.origin + '/#success?provider=coinbase')}`;
           break;
         case 'onramper':
-          link = PAYMENT_LINKS.onramper(mountainParams);
+          link = PAYMENT_LINKS.onramper(baseParams);
           break;
       }
 
       if (link) {
-        // Track event
         if (typeof window !== 'undefined' && window.gtag) {
           window.gtag('event', 'payment_initiated', {
             provider: selectedProvider,
@@ -157,7 +183,7 @@ export function PaymentButtons({
 
       {/* Provider selector */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        {(['transak', 'moonpay', 'paybis', 'onramper'] as const).map((p) => {
+        {(['transak', 'moonpay', 'paybis', 'coinbase', 'onramper'] as const).map((p) => {
           const c = PROVIDER_CONFIG[p];
           return (
             <button
