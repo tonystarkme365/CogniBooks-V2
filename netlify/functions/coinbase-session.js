@@ -10,7 +10,7 @@ const SITE_URL = process.env.URL || 'https://cognibook.netlify.app';
 /**
  * Generate ES256 JWT for Coinbase CDP authentication
  */
-function generateCDPToken(payload: object): string {
+function generateCDPToken(payload) {
   const header = {
     alg: 'ES256',
     typ: 'JWT',
@@ -82,7 +82,7 @@ export async function handler(event) {
 
     // Build Coinbase Onramp URL
     const params = new URLSearchParams({
-      sessionToken: sessionToken,
+      sessionToken,
       defaultAsset: 'USDC',
       defaultNetwork: 'polygon',
       presetFiatAmount: amount,
