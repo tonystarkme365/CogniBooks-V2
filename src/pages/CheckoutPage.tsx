@@ -267,7 +267,7 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
     } else { setEmailErr(''); }
     if (!valid) return;
 
-    const btn = document.querySelector('button[type="submit"]');
+    const btn = document.querySelector('button[type="submit"]') as HTMLButtonElement | null;
     if (btn) {
       btn.disabled = true;
       btn.textContent = 'Creating order...';
@@ -293,7 +293,7 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
       console.error('Order creation failed:', err);
       alert(err.message || 'Failed to create order. Please try again.');
 
-      const btn = document.querySelector('button[type="submit"]');
+      const btn = document.querySelector('button[type="submit"]') as HTMLButtonElement | null;
       if (btn) {
         btn.disabled = false;
         btn.textContent = 'Continue to Payment →';

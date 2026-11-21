@@ -162,8 +162,6 @@ export function PaymentSection({
         </button>
 
       </div>
-
-      </div>
     </div>
   );
 }

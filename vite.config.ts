@@ -41,6 +41,4 @@ export default defineConfig({
   },
   // Enable all logging
   logLevel: 'info',
-  // Disable silent mode
-  silent: false,
 });

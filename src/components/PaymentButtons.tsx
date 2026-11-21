@@ -3,8 +3,15 @@
 import { useState } from 'react';
 import { PAYMENT_LINKS } from '@/lib/payments';
 
+// Extend Window interface for gtag
+declare global {
+  interface Window {
+    gtag: (...args: any[]) => void;
+  }
+}
+
 interface PaymentButtonProps {
-  provider: 'transak' | 'moonpay' | 'paybis' | 'onramper';
+  provider: 'transak' | 'moonpay' | 'paybis' | 'coinbase' | 'onramper';
   amount: number;
   currency?: string;
   cryptoCurrency?: string;
@@ -43,29 +50,16 @@ const PROVIDER_CONFIG = {
     color: '#00d4ff',
     hoverColor: '#0099cc',
   },
-  paybis: {
+paybis: {
     label: 'Credit/Debit Card (PayPal / Card)',
     description: 'Pay with Visa, Mastercard, PayPal',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.68-.35.68-.78 0-.39-.01-1.69-.01-3.33-2.78.6-3.37-1.34-3.37-1.34-.45-1.15-1.11-1.46-1.11-1.46-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.69.92.69 1.85 0 1.33-.01 2.41-.01 2.74 0 .43.18.86.69.78A10.02 10.02 0 0022 12c0-5.52-4.48-10-10-10z"/>
+        <path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.68-.35.68-.78 0-.39-.01-1.69-.01-3.33-2.78.6-3.37-1.34-3.37-1.34-.45-1.15-1.11-1.46-1.11-1.46-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.69.92.69 1.85 0 1.33-.01-2.41-.01 2.74 0 .43.18.86.69.78A10.02 10.02 0 0022 12c0-5.52-4.48-10-10-10z"/>
       </svg>
     ),
     color: '#ff6b35',
     hoverColor: '#e55a2a',
-  },
-  onramper: {
-    label: 'Best Rate (Auto-select)',
-    description: 'Automatically finds the best rate across providers',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 6v6l4 2"/>
-        <path d="M12 6v6l-4 2"/>
-      </svg>
-    ),
-    color: '#8b5cf6',
-    hoverColor: '#7c3aed',
   },
   coinbase: {
     label: 'Coinbase (NY & All US States)',
@@ -77,19 +71,6 @@ const PROVIDER_CONFIG = {
     ),
     color: '#0052ff',
     hoverColor: '#0041cc',
-  },
-  onramper: {
-    label: 'Best Rate (Auto-select)',
-    description: 'Automatically finds the best rate across providers',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 6v6l4 2"/>
-        <path d="M12 6v6l-4 2"/>
-      </svg>
-    ),
-    color: '#8b5cf6',
-    hoverColor: '#7c3aed',
   },
 };
 
@@ -276,7 +257,7 @@ export function PaymentButtons({
         {config.description}
       </p>
 
-      <style jsx>{`
+      <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
         }
