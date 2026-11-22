@@ -32,3 +32,5 @@ node.exe
 
 # TypeScript
 *.tsbuildinfo
+# Local Netlify folder
+.netlify
