@@ -2,6 +2,7 @@
   publish = "dist"
   command = "npm run build"
   functions = "netlify/functions"
+  node_bundler = "esbuild"
 
 [build.environment]
   NODE_OPTIONS = "--trace-warnings --trace-uncaught --max-old-space-size=4096"
