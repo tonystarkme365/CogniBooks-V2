@@ -4,6 +4,11 @@
   functions = "netlify/functions"
   node_bundler = "esbuild"
 
+[dev]
+  command = "npm run dev"
+  targetPort = 5173
+  port = 8888
+
 [build.environment]
   NODE_OPTIONS = "--trace-warnings --trace-uncaught --max-old-space-size=4096"
   VITE_VERBOSE = "true"

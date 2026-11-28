@@ -8,7 +8,8 @@
 Before EVERY `git push`:
 1. Run `npm run verify:functions` — must exit code 0
 2. Run `npx netlify build` locally — must exit code 0
-3. Only push after BOTH pass locally
+3. Run `node tools/browser_verify.mjs https://cognibook.netlify.app` — must exit code 0 (visual + functional verification)
+4. Only push after ALL pass locally
 
 ## 3. Deploy Trigger Discipline
 - NEVER run `netlify deploy --build` concurrently with `git push`
@@ -27,3 +28,9 @@ Before EVERY `git push`:
 ## 6. Build Cache Invalidation
 - When `netlify.toml` or function configs change, clear Netlify build cache before retry
 - Use `netlify build --offline` for local verification when possible
+
+## 7. Browser GUI Verification (MANDATORY)
+- Every change must pass `node tools/browser_verify.mjs` against live production URL
+- Captured screenshots (`screenshots/cb_desktop.png`, `screenshots/cb_mobile.png`, `screenshots/cb_product.png`, `screenshots/cb_checkout_step1.png`, `screenshots/cb_checkout_filled.png`, `screenshots/cb_checkout_payment.png`) must be visually inspected via `read` tool
+- Zero console errors, zero page errors, zero network errors (>=500) allowed
+- Checkout flow must render: homepage → product → buy → info form → payment methods

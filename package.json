@@ -21,12 +21,14 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "@types/node": "22.0.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "4.3.4",
     "esbuild": "^0.28.2",
     "netlify-cli": "^27.20.1",
+    "playwright": "^1.65.1",
     "typescript": "5.4.5",
     "vite": "^5.4.14"
   }
