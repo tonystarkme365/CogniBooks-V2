@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import ProductPage from './pages/ProductPage';
 import CheckoutPage from './pages/CheckoutPage';
 import SuccessPage from './pages/SuccessPage';
+import RecoveryPage from './pages/RecoveryPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import AdminPage from './pages/AdminPage';
@@ -28,6 +29,7 @@ function App() {
     case 'product':   return <ProductPage productId={pageParams.id || ''} />;
     case 'checkout':  return <CheckoutPage productId={pageParams.id || ''} />;
     case 'success':   return <SuccessPage />;
+    case 'recover':   return <RecoveryPage />;
     case 'privacy':   return <PrivacyPage />;
     case 'terms':     return <TermsPage />;
     case 'x9k2m7p4admin': return <AdminPage />;

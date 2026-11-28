@@ -1,9 +1,17 @@
 import { useEffect, useState } from 'react';
 import CONFIG from '../config.js';
 
+const C = {
+  primary: '#00ff88',
+  text: '#ffffff',
+  muted: '#c0c0d8',
+};
+
 const SuccessPage = () => {
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
+  const [polling, setPolling] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -13,13 +21,31 @@ const SuccessPage = () => {
     if (token && !downloading) {
       triggerDownload(token);
     } else if (!token && orderId) {
-      // Order exists but no token - maybe webhook hasn't fired yet
-      setDownloadError('Payment confirmed. Check your email for the download link.');
+      pollOrderStatus(orderId);
     } else if (!token && !orderId) {
-      // No token, no order - generic success
       setDownloadError('Purchase complete! Check your email for the download link.');
     }
   }, []);
+
+  const pollOrderStatus = async (orderId: string) => {
+    setPolling(true);
+    try {
+      const res = await fetch(`/.netlify/functions/order-status?orderId=${encodeURIComponent(orderId)}`);
+      const data = await res.json();
+      setStatus(data.status);
+      if (data.status === 'completed' && data.downloadUrl) {
+        triggerDownload(data.downloadUrl.split('token=')[1]);
+      } else if (data.status === 'completed') {
+        setDownloadError('Payment confirmed. Check your email for the download link.');
+      } else {
+        setDownloadError(`Payment status: ${data.status}. Please wait for confirmation.`);
+      }
+    } catch {
+      setDownloadError('Unable to check payment status. Check your email for the download link.');
+    } finally {
+      setPolling(false);
+    }
+  };
 
   const triggerDownload = async (token: string) => {
     setDownloading(true);
@@ -73,7 +99,16 @@ const SuccessPage = () => {
           Thank you for your purchase!
         </p>
         
-        {downloading && (
+        {polling && (
+          <div style={{ marginBottom: 24, padding: 16, background: 'rgba(0,255,136,.1)', border: '1px solid rgba(0,255,136,.3)', borderRadius: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+              <div style={{ width: 20, height: 20, border: '2px solid var(--clr-primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+              <span style={{ color: 'var(--clr-primary)', fontWeight: 600 }}>Verifying payment...</span>
+            </div>
+          </div>
+        )}
+
+        {downloading && !polling && (
           <div style={{ marginBottom: 24, padding: 16, background: 'rgba(0,255,136,.1)', border: '1px solid rgba(0,255,136,.3)', borderRadius: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
               <div style={{ width: 20, height: 20, border: '2px solid var(--clr-primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
@@ -82,7 +117,7 @@ const SuccessPage = () => {
           </div>
         )}
 
-        {downloadError && !downloading && (
+        {downloadError && !downloading && !polling && (
           <div style={{ marginBottom: 24, padding: 16, background: 'rgba(255,170,0,.1)', border: '1px solid rgba(255,170,0,.3)', borderRadius: 12 }}>
             <p style={{ color: 'var(--clr-warn)', margin: 0 }}>⚠️ {downloadError}</p>
           </div>
@@ -95,6 +130,7 @@ const SuccessPage = () => {
               '✓ Check your inbox (and spam folder) for the download link',
               '✓ Your PDF is ready for instant access on any device',
               '✓ Save it offline — you own it forever',
+              '✓ Lost your link? Visit Recover My Download in the footer',
               '✓ Need help? Email support@cognibooks.com'
             ].map((item,i)=>(
               <li key={i} style={{ color:'var(--clr-muted)',borderBottom:i<3?'1px solid var(--clr-border)':'none',paddingBottom:i<3?4:0 }}>{item}</li>
@@ -103,6 +139,7 @@ const SuccessPage = () => {
         </div>
         <div style={{ display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:28 }}>
           <a href="#home" className="btn btn-primary" style={{ padding:'13px 28px' }}>Browse More eBooks</a>
+          <a href="#recover" className="btn btn-ghost" style={{ padding:'13px 28px' }}>Recover My Download</a>
           <a href="mailto:support@cognibooks.com" className="btn btn-ghost" style={{ padding:'13px 28px' }}>Contact Support</a>
         </div>
         <div className="glass" style={{ padding:18,background:'rgba(255,0,255,.04)',border:'1px solid rgba(255,0,255,.14)' }}>
@@ -110,8 +147,8 @@ const SuccessPage = () => {
           <p style={{ fontSize:13,color:'var(--clr-muted)',marginBottom:12 }}>Get the remaining {CONFIG.products.length-1} eBooks at a 40% bundle discount!</p>
           <a href="#home" className="btn btn-secondary" style={{ fontSize:13 }}>View Bundle →</a>
         </div>
+        <style>{`@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}} @keyframes spin{to{transform:rotate(360deg)}}`}</style>
       </div>
-      <style>{`@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}} @keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   );
 };

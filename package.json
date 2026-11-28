@@ -10,7 +10,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "verify:functions": "node --check netlify/functions/download-ebook.mjs && esbuild netlify/functions/*.* --bundle --platform=node --format=esm --outdir=.tmp-fn-check && node -e \"const fs=require('fs'); fs.rmSync('.tmp-fn-check', {recursive:true, force:true})\""
+    "verify:functions": "node -e \"const fs=require('fs');const f=fs.readdirSync('netlify/functions').filter(x=>x.endsWith('.js')||x.endsWith('.mjs'));f.forEach(x=>{try{require('child_process').execSync('node --check netlify/functions/'+x,{stdio:'inherit'});}catch(e){process.exit(1);}}\") && esbuild netlify/functions/*.* --bundle --platform=node --format=esm --outdir=.tmp-fn-check && node -e \"const fs=require('fs'); fs.rmSync('.tmp-fn-check', {recursive:true, force:true})\""
   },
   "dependencies": {
     "@crossmint/client-sdk-react-ui": "^1.0.0",
