@@ -49,7 +49,6 @@ export function FreePromptPreview({ productId, prompts }: FreePromptPreviewProps
 
       {isOpen && (
         <div
-          onClick={(e) => e.stopPropagation()}
           style={{
             position: 'fixed',
             inset: 0,
@@ -61,8 +60,10 @@ export function FreePromptPreview({ productId, prompts }: FreePromptPreviewProps
             justifyContent: 'center',
             padding: '24px',
           }}
+          onClick={() => setIsOpen(false)}
         >
           <div
+            onClick={(e) => e.stopPropagation()}
             style={{
               background: 'linear-gradient(145deg,rgba(18,18,36,.99),rgba(10,10,22,.99))',
               border: '1px solid rgba(0,255,136,.3)',
