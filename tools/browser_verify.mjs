@@ -22,9 +22,9 @@ async function captureScreenshot(page, name, viewport) {
   return filepath;
 }
 
-async function clickAndCapture(page, selector, name) {
+async function clickAndCapture(page, selector, name, timeout = 10000) {
   try {
-    await page.waitForSelector(selector, { timeout: 10000 });
+    await page.waitForSelector(selector, { timeout });
     await page.click(selector);
     await page.waitForTimeout(1500);
     const filepath = path.join(SCREENSHOTS_DIR, `${name}.png`);
@@ -39,56 +39,148 @@ async function clickAndCapture(page, selector, name) {
 
 async function testFunctionEndpoints(page) {
   const endpoints = [
-    '/.netlify/functions/download-ebook',
-    '/.netlify/functions/download-ebook?token=invalid',
-    '/.netlify/functions/create-order',
-    '/.netlify/functions/coinbase-session',
+    { path: '/.netlify/functions/download-ebook', expectedStatus: 400, method: 'GET' },
+    { path: '/.netlify/functions/download-ebook?token=invalid', expectedStatus: 403, method: 'GET' },
+    { path: '/.netlify/functions/create-order', expectedStatus: 405, method: 'GET' },
+    { path: '/.netlify/functions/coinbase-session', expectedStatus: [409, 500], method: 'GET' },
   ];
 
   for (const ep of endpoints) {
     try {
-      const response = await page.request.get(`${BASE_URL}${ep}`);
+      const response = await page.request[ep.method.toLowerCase()](`${BASE_URL}${ep.path}`);
       const status = response.status();
       const body = await response.text();
-      console.log(`🔗 ${ep} → ${status}: ${body.substring(0, 100)}`);
-      if (status >= 500 && !ep.includes('coinbase-session')) {
-        networkErrors.push({ endpoint: ep, status, body });
+      const ok = Array.isArray(ep.expectedStatus) ? ep.expectedStatus.includes(status) : status === ep.expectedStatus;
+      console.log(`🔗 ${ep.path} → ${status} ${ok ? '✅' : '❌'}: ${body.substring(0, 100)}`);
+      if (!ok && status >= 500) {
+        networkErrors.push({ endpoint: ep.path, status, body });
       }
     } catch (e) {
-      networkErrors.push({ endpoint: ep, error: e.message });
-      console.log(`❌ ${ep} → ERROR: ${e.message}`);
+      networkErrors.push({ endpoint: ep.path, error: e.message });
+      console.log(`❌ ${ep.path} → ERROR: ${e.message}`);
     }
   }
 }
 
-async function runCheckoutFlow(page) {
+async function testJWTPDFDownload(page) {
+  console.log('\n🔐 Testing JWT PDF download flow...');
+  
+  // Test with invalid token - should return 403
+  try {
+    const res = await page.request.get(`${BASE_URL}/.netlify/functions/download-ebook?token=invalid.token.here`);
+    const status = res.status();
+    const body = await res.json();
+    console.log(`🔐 Invalid token → ${status}: ${body.error || body}`);
+    if (status !== 403) {
+      console.log(`⚠️  Expected 403 for invalid token, got ${status}`);
+    }
+  } catch (e) {
+    console.log(`❌ JWT test error: ${e.message}`);
+  }
+  
+  // Test with missing token - should return 400
+  try {
+    const res = await page.request.get(`${BASE_URL}/.netlify/functions/download-ebook`);
+    const status = res.status();
+    const body = await res.json();
+    console.log(`🔐 Missing token → ${status}: ${body.error || body}`);
+    if (status !== 400) {
+      console.log(`⚠️  Expected 400 for missing token, got ${status}`);
+    }
+  } catch (e) {
+    console.log(`❌ Missing token test error: ${e.message}`);
+  }
+}
+
+async function testFreePromptPreview(page) {
+  console.log('\n🎁 Testing Free Prompt Preview modal...');
+  
+  try {
+    // Navigate to a product page
+    await page.goto(`${BASE_URL}/#product/1`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.waitForTimeout(3000);
+    
+    // Click the "Try 3 Free Prompts" button
+    const previewButton = await page.waitForSelector('button:has-text("Try 3 Free Prompts")', { timeout: 10000 });
+    await previewButton.click();
+    await page.waitForTimeout(2000);
+    
+    // Verify modal is open
+    const modal = await page.waitForSelector('[style*="z-index: 9999"]', { timeout: 5000 });
+    console.log('✅ Free Prompt Preview modal opened');
+    
+    // Copy a prompt
+    const copyButton = await page.waitForSelector('button:has-text("Copy")', { timeout: 5000 });
+    await copyButton.click();
+    await page.waitForTimeout(1000);
+    
+    // Verify copy button changed to "Copied!"
+    try {
+      await page.waitForSelector('button:has-text("✓ Copied!")', { timeout: 3000 });
+      console.log('✅ Prompt copy works');
+    } catch (e) {
+      console.log('⚠️  Copy button did not change to "Copied!"');
+    }
+    
+    // Close modal
+    const closeButton = await page.waitForSelector('button[aria-label="close"], button:has-text("✕")', { timeout: 5000 });
+    await closeButton.click();
+    await page.waitForTimeout(1000);
+    
+    // Verify modal is closed
+    const modalStillOpen = await page.locator('[style*="z-index: 9999"]').count();
+    if (modalStillOpen === 0) {
+      console.log('✅ Free Prompt Preview modal closed cleanly');
+    } else {
+      console.log('⚠️  Modal still open after close');
+    }
+    
+    await captureScreenshot(page, 'cb_prompt_preview', { width: 1440, height: 900 });
+    
+  } catch (e) {
+    console.log(`⚠️  Free Prompt Preview test error: ${e.message}`);
+  }
+}
+
+async function testCheckoutFlow(page) {
   console.log('\n🛒 Testing checkout flow...');
   
-  // Navigate to product page
-  await page.goto(`${BASE_URL}/#product/1`, { waitUntil: 'domcontentloaded', timeout: 60000 });
-  await page.waitForTimeout(3000);
-  await captureScreenshot(page, 'cb_product', { width: 1440, height: 900 });
-  
-  // Click "Buy Now" button
-  await clickAndCapture(page, 'a[href*="checkout"]', 'cb_checkout_step1');
-  
-  // Fill in name and email
   try {
-    await page.waitForSelector('input[placeholder*="Jane"]', { timeout: 10000 });
-    await page.fill('input[placeholder*="Jane"]', 'Test User');
-    await page.fill('input[placeholder*="jane"]', 'test@example.com');
-    await captureScreenshot(page, 'cb_checkout_filled', { width: 1440, height: 900 });
-    
-    // Click Continue to Payment
-    await page.click('button:has-text("Continue to Payment")');
+    // Navigate to product page
+    await page.goto(`${BASE_URL}/#product/1`, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(3000);
-    await captureScreenshot(page, 'cb_checkout_payment', { width: 1440, height: 900 });
+    await captureScreenshot(page, 'cb_product', { width: 1440, height: 900 });
     
-    // Test payment links
-    const paybisLink = await page.$('a[href*="paybis"]');
-    const transakLink = await page.$('a[href*="transak"]');
-    if (paybisLink) console.log('✅ Paybis link found');
-    if (transakLink) console.log('✅ Transak link found');
+    // Click "Buy Now" button
+    await clickAndCapture(page, 'a[href*="checkout"]', 'cb_checkout_step1');
+    
+    // Fill in name and email
+    try {
+      await page.waitForSelector('input[placeholder*="Jane"]', { timeout: 10000 });
+      await page.fill('input[placeholder*="Jane"]', 'Test User');
+      await page.fill('input[placeholder*="jane"]', 'test@example.com');
+      await captureScreenshot(page, 'cb_checkout_filled', { width: 1440, height: 900 });
+      
+      // Click Continue to Payment
+      await page.click('button:has-text("Continue to Payment")');
+      await page.waitForTimeout(3000);
+      await captureScreenshot(page, 'cb_checkout_payment', { width: 1440, height: 900 });
+      
+      // Check which payment methods are shown
+      const paybisLink = await page.locator('a[href*="paybis"]').count();
+      const transakLink = await page.locator('a[href*="transak"]').count();
+      const moonpayLink = await page.locator('a[href*="moonpay"]').count();
+      const noProviders = await page.locator('text="No payment providers configured"').count();
+      
+      console.log(`💳 Payment methods: PayBis=${paybisLink}, Transak=${transakLink}, MoonPay=${moonpayLink}, NoProviders=${noProviders}`);
+      
+      if (noProviders > 0) {
+        console.log('ℹ️  No payment providers configured - this is expected for sites without API keys');
+      }
+      
+    } catch (e) {
+      console.log(`⚠️  Checkout flow form error: ${e.message}`);
+    }
     
   } catch (e) {
     console.log(`⚠️  Checkout flow error: ${e.message}`);
@@ -104,7 +196,6 @@ async function run() {
 
   page.on('console', msg => {
     if (msg.type() === 'error') {
-      // Filter out expected connection resets
       const text = msg.text();
       if (!text.includes('ERR_CONNECTION_RESET') && !text.includes('favicon')) {
         consoleErrors.push(text);
@@ -128,7 +219,7 @@ async function run() {
   try {
     console.log('\n📱 Loading homepage...');
     await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await page.waitForTimeout(5000); // Wait for React to hydrate
+    await page.waitForTimeout(5000);
 
     console.log('\n🖥️  Capturing Desktop (1440x900)...');
     await captureScreenshot(page, 'cb_desktop', { width: 1440, height: 900 });
@@ -136,8 +227,14 @@ async function run() {
     console.log('\n📱 Capturing Mobile (390x844)...');
     await captureScreenshot(page, 'cb_mobile', { width: 390, height: 844 });
 
+    // Test free prompt preview
+    await testFreePromptPreview(page);
+
     // Test checkout flow
-    await runCheckoutFlow(page);
+    await testCheckoutFlow(page);
+
+    // Test JWT PDF download
+    await testJWTPDFDownload(page);
 
     console.log('\n🔗 Testing Netlify Function endpoints...');
     await testFunctionEndpoints(page);

@@ -51,7 +51,7 @@ const ProductPage = ({ productId }: ProductPageProps) => {
   const related = CONFIG.products.filter((p:any) => p.id !== product.id).slice(0,3);
 
   return (
-    <div style={{ minHeight:'100vh',background:'var(--clr-bg)',color:'var(--clr-text)' }}>
+    <div style={{ minHeight:'100vh',background:'var(--clr-bg)',color:'var(--clr-text)',paddingTop:'80px' }}>
       {/* Header */}
       <header className="site-header">
         <div className="container">
