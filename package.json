@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "verify:functions": "node --check netlify/functions/download-ebook.mjs && esbuild netlify/functions/*.* --bundle --platform=node --format=esm --outdir=.tmp-fn-check && node -e \"const fs=require('fs'); fs.rmSync('.tmp-fn-check', {recursive:true, force:true})\""
   },
   "dependencies": {
     "@crossmint/client-sdk-react-ui": "^1.0.0",
@@ -24,6 +25,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "4.3.4",
+    "esbuild": "^0.28.2",
     "netlify-cli": "^27.20.1",
     "typescript": "5.4.5",
     "vite": "^5.4.14"

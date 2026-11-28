@@ -1,0 +1,29 @@
+# CogniBooks_V2 Permanent Guardrails
+
+## 1. Function File Integrity
+- NEVER run partial search-and-replace edits on `netlify/functions/*.mjs` if a file has duplicate declarations; delete and rewrite cleanly.
+- Always verify with `npm run verify:functions` after any function file changes.
+
+## 2. Pre-Push Verification (MANDATORY)
+Before EVERY `git push`:
+1. Run `npm run verify:functions` — must exit code 0
+2. Run `npx netlify build` locally — must exit code 0
+3. Only push after BOTH pass locally
+
+## 3. Deploy Trigger Discipline
+- NEVER run `netlify deploy --build` concurrently with `git push`
+- Let GitHub's webhook trigger a single clean deploy
+- One deploy trigger per change set
+
+## 4. Duplicate Declaration Prevention
+- Before committing any `.mjs` or `.js` in `netlify/functions/`, run `node --check <file>` to catch syntax/duplicate errors
+- Use `esbuild --bundle --platform=node --format=esm` to catch bundling conflicts locally
+
+## 5. Environment Variable Hygiene
+- All required env vars documented in `.env.example`
+- Never commit secrets; use Netlify Dashboard for production values
+- Verify env var names match between code and dashboard
+
+## 6. Build Cache Invalidation
+- When `netlify.toml` or function configs change, clear Netlify build cache before retry
+- Use `netlify build --offline` for local verification when possible
