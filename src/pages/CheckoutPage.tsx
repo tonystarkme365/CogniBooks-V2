@@ -226,7 +226,7 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
   const [couponCode, setCouponCode] = useState('');
   const [couponMsg,  setCouponMsg]  = useState('');
   const [appliedCoupon, setApplied] = useState<any>(null);
-  const [paymentData, setPaymentData] = useState<{ paybisUrl: string; transakUrl: string; orderId: string } | null>(null);
+  const [paymentData, setPaymentData] = useState<{ paybisUrl: string | null; transakUrl: string | null; moonpayUrl: string | null; orderId: string; providers: Record<string, string | null> } | null>(null);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -287,7 +287,13 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
       }
 
       sessionStorage.setItem('cognibooks_order_id', data.orderId);
-      setPaymentData({ paybisUrl: data.paybisUrl, transakUrl: data.transakUrl, orderId: data.orderId });
+      setPaymentData({
+        paybisUrl: data.providers?.paybis ?? null,
+        transakUrl: data.providers?.transak ?? null,
+        moonpayUrl: data.providers?.moonpay ?? null,
+        orderId: data.orderId,
+        providers: data.providers ?? {},
+      });
       setPhase('payment');
     } catch (err) {
       console.error('Order creation failed:', err);
@@ -419,6 +425,7 @@ const CheckoutPage = ({ productId }: { productId: string }) => {
           <PaymentMethodButtons
             paybisUrl={paymentData.paybisUrl}
             transakUrl={paymentData.transakUrl}
+            moonpayUrl={paymentData.moonpayUrl}
             name={name}
             email={email}
             onBack={() => setPhase('info')}

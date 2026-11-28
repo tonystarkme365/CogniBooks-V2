@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import CONFIG from '../config.js';
 import { formatPrice } from '../utils.js';
+import { FreePromptPreview } from '@/components/FreePromptPreview';
 
 interface ProductPageProps { productId: string; }
 
@@ -104,6 +105,9 @@ const ProductPage = ({ productId }: ProductPageProps) => {
               {product.stock < 10 && <div className="stock-warn" style={{ marginBottom:18 }}>⚠️ Only {product.stock} copies left at this price!</div>}
 
               <p style={{ fontSize:15,lineHeight:1.8,color:'var(--clr-muted)',marginBottom:22 }}>{product.description}</p>
+
+              {/* Free Prompt Preview */}
+              <FreePromptPreview productId={product.id} prompts={product.freePrompts} />
 
               {/* Tabs */}
               <div style={{ marginBottom:22 }}>

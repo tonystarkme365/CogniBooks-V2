@@ -97,23 +97,27 @@ export async function handler(event) {
     // Generate JWT for payment session (15 min expiry)
     const paymentToken = signJWT({ orderId: order.id, productId: product.id, amount: product.price }, '15m');
 
-    // Build payment URLs
-    const paybisUrl = buildPayBisUrl({ amount: product.price, orderId: order.id, token: paymentToken });
-    const transakUrl = buildTransakUrl({ amount: product.price, orderId: order.id, token: paymentToken });
-    const moonpayUrl = buildMoonPayUrl({ amount: product.price, orderId: order.id, token: paymentToken });
+    // Build payment URLs - only include configured providers
+    const paybisConfigured = Boolean(PAYBIS_API_KEY);
+    const transakConfigured = Boolean(TRANSAK_API_KEY);
+    const moonpayConfigured = Boolean(MOONPAY_API_KEY && MOONPAY_SECRET_KEY);
+
+    const response = {
+      orderId: order.id,
+      amount: product.price,
+      product: { id: product.id, title: product.title },
+      paymentToken,
+      providers: {
+        paybis: paybisConfigured ? buildPayBisUrl({ amount: product.price, orderId: order.id, token: paymentToken }) : null,
+        transak: transakConfigured ? buildTransakUrl({ amount: product.price, orderId: order.id, token: paymentToken }) : null,
+        moonpay: moonpayConfigured ? buildMoonPayUrl({ amount: product.price, orderId: order.id, token: paymentToken }) : null,
+      },
+    };
 
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        orderId: order.id,
-        amount: product.price,
-        product: { id: product.id, title: product.title },
-        paybisUrl,
-        transakUrl,
-        moonpayUrl,
-        paymentToken,
-      }),
+      body: JSON.stringify(response),
     };
   } catch (err) {
     console.error('Create order error:', err);

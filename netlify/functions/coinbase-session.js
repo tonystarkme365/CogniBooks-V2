@@ -50,8 +50,12 @@ export async function handler(event) {
     if (!CDP_API_KEY_NAME || !CDP_API_KEY_PRIVATE_KEY) {
       console.error('Coinbase CDP credentials not configured');
       return { 
-        statusCode: 500, 
-        body: JSON.stringify({ error: 'Coinbase CDP not configured. Set CDP_API_KEY_NAME and CDP_API_KEY_PRIVATE_KEY environment variables.' }) 
+        statusCode: 409, 
+        body: JSON.stringify({ 
+          error: 'provider_not_configured', 
+          provider: 'coinbase',
+          message: 'Coinbase Onramp is not configured on this site. Please choose another payment method.' 
+        }) 
       };
     }
 

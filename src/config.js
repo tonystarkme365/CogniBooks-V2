@@ -29,6 +29,11 @@ export const CONFIG = {
       cover: "/AI Arsenal for Entrepreneurs.webp",
       pdfFile: "/ebooks/AI Arsenal for Entrepreneurs.pdf",
       bestseller: true, stock: 3, rating: 4.9, reviewCount: 127, pages: 156, format: "PDF",
+      freePrompts: [
+        { id: 1, title: "Investor Pitch Deck Outline", preview: "Write a 10-slide pitch deck outline for a Series A startup. Include: problem statement, market size, solution, business model, traction, team, competition, financials, and ask. Make each slide actionable with specific slide-by-slide copy." },
+        { id: 2, title: "Customer Persona Generator", preview: "Create a detailed buyer persona for my AI productivity tool. Include demographics, psychographics, pain points, goals, objections, preferred channels, and a day-in-the-life narrative." },
+        { id: 3, title: "SWOT Analysis Framework", preview: "Conduct a SWOT analysis for my e-commerce business competing against Amazon. Give me 5 specific items per quadrant with actionable mitigation strategies for each weakness and threat." },
+      ],
       features: ["500+ battle-tested ChatGPT prompts","Business strategy & planning","Marketing & sales automation","Product development frameworks","Fundraising & pitch deck creation","Team management & hiring","Growth hacking strategies","Market research & competitor analysis","Financial modeling & projections","Crisis management scenarios"],
       benefits: ["Save 20+ hours per week on routine tasks","Generate investor-ready pitch decks in minutes","Create marketing campaigns that convert","Make data-driven decisions faster"]
     },
@@ -43,6 +48,11 @@ export const CONFIG = {
       cover: "/Promotion-Ready With AI Prompts.webp",
       pdfFile: "/ebooks/Promotion-Ready With AI Prompts.pdf",
       bestseller: true, stock: 7, rating: 4.8, reviewCount: 94, pages: 134, format: "PDF",
+      freePrompts: [
+        { id: 1, title: "Self-Review Draft", preview: "Write a comprehensive self-performance review. I'm a Senior Product Manager. Highlight: shipped 3 major features, mentored 2 junior PMs, improved NPS by 15 points. Use executive tone with metrics." },
+        { id: 2, title: "Promotion Request Email", preview: "Draft an email to my director requesting promotion to Director of Product. Include: business impact, leadership evidence, market salary data, and a clear ask for the next review cycle." },
+        { id: 3, title: "Difficult Conversation Script", preview: "Script for telling a direct report they're not getting promoted. Empathetic but clear. Include specific development areas, 30/60/90 plan, and next steps." },
+      ],
       features: ["400+ career-accelerating prompts","Performance review preparation","Executive communication templates","Leadership & management prompts","Negotiation & conflict resolution","Professional networking strategies","Personal branding & LinkedIn optimization","Meeting facilitation & presentations","Strategic thinking frameworks","Stakeholder management"],
       benefits: ["Stand out in performance reviews","Communicate like a C-level executive","Lead projects that get noticed","Build a reputation as a problem-solver"]
     },
@@ -57,6 +67,11 @@ export const CONFIG = {
       cover: "/The P.A.C.E Academic Writing Toolkit.webp",
       pdfFile: "/ebooks/The P.A.C.E Academic Writing Toolkit.pdf",
       bestseller: false, stock: 12, rating: 4.9, reviewCount: 156, pages: 142, format: "PDF",
+      freePrompts: [
+        { id: 1, title: "Thesis Statement Builder", preview: "Help me write a thesis statement for an argumentative essay on 'AI in higher education'. Take a clear stance, make it debatable, and include three supporting arguments." },
+        { id: 2, title: "Literature Review Outline", preview: "Create a 5-source literature review outline for a psychology paper on sleep and academic performance. Include themes, gaps, and synthesis points." },
+        { id: 3, title: "Exam Study Schedule", preview: "Generate a 7-day exam prep schedule for a college biology midterm. Include active recall, spaced repetition, and practice questions for cell biology and genetics." },
+      ],
       features: ["450+ academic excellence prompts","Research & literature review","Essay structure & thesis development","Citation & bibliography formatting","Exam preparation & study strategies","Critical thinking & analysis","Scientific writing & lab reports","Presentation & oral defense prep","Time management for students","Subject-specific prompts (STEM, humanities)"],
       benefits: ["Cut research time by 60%","Write A+ essays with confidence","Master any subject faster","Ace exams with smart study strategies"]
     },
@@ -71,6 +86,11 @@ export const CONFIG = {
       cover: "/The Invisible Assistant.webp",
       pdfFile: "/ebooks/The Invisible Assistant.pdf",
       bestseller: false, stock: 15, rating: 4.8, reviewCount: 83, pages: 118, format: "PDF",
+      freePrompts: [
+        { id: 1, title: "Weekly Meal Plan", preview: "Create a 5-day family dinner plan (4 people, $60 budget). Include kid-friendly recipes, grocery list grouped by aisle, and 15-minute prep options for busy weeknights." },
+        { id: 2, title: "Homework Helper", preview: "Explain long division to a 4th grader. Use simple language, a step-by-step example with 84 ÷ 6, and 3 practice problems with answers." },
+        { id: 3, title: "Behavior Chart System", preview: "Design a positive reinforcement chart for a 6-year-old. Include specific behaviors to track, reward tiers, and a weekly review template." },
+      ],
       features: ["350+ parenting & family prompts","Meal planning & nutrition","Homework help (all grade levels)","Behavior management strategies","Age-appropriate activities","Birthday party & event planning","Health & wellness guidance","Bedtime routines & sleep solutions","Travel planning with kids","Emergency preparedness"],
       benefits: ["Reduce daily stress and decision fatigue","Create memorable family experiences","Help kids succeed academically","Master work-life balance"]
     },
@@ -85,6 +105,11 @@ export const CONFIG = {
       cover: "/The Sovereign Sanctuary.webp",
       pdfFile: "/ebooks/The Sovereign Sanctuary.pdf",
       bestseller: false, stock: 18, rating: 4.7, reviewCount: 71, pages: 128, format: "PDF",
+      freePrompts: [
+        { id: 1, title: "Closet Declutter Plan", preview: "Create a weekend closet declutter schedule. Saturday: sort by category. Sunday: donate/sell/toss decisions. Include decision rules (keep if worn in 12 months)." },
+        { id: 2, title: "Budget-Friendly Meal Prep", preview: "Plan 5 lunches under $30 total. Include recipes, shopping list, storage instructions, and reheating guide for office microwave." },
+        { id: 3, title: "Side Hustle Ideas", preview: "List 5 side hustle ideas for a full-time teacher with evenings and weekends free. Include startup cost, time commitment, and first 3 steps for each." },
+      ],
       features: ["400+ home & life optimization prompts","Home organization & decluttering","Budget & financial management","Healthy meal planning & recipes","DIY & creative projects","Self-care & personal wellness","Side hustle & income ideas","Garden & home improvement","Sustainable living practices","Personal development & growth"],
       benefits: ["Create a home you're proud of","Master your finances and budget","Discover new income opportunities","Prioritize self-care without guilt"]
     }
