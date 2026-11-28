@@ -125,7 +125,7 @@ const ProductPage = ({ productId }: ProductPageProps) => {
               </div>
 
               <a href={`#checkout/${product.id}`} className="btn btn-primary btn-lg"
-                style={{ width:'100%',marginBottom:14,boxShadow:'0 6px 28px rgba(0,255,136,.35)' }}>
+                style={{ width:'100%',marginBottom:14,boxShadow:'0 6px 28px rgba(0,255,136,.35)',scrollMarginTop:'160px' }}>
                 🛒 Buy Now — {formatPrice(product.price)}
               </a>
 
